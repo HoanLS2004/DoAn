@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../config/api.config';
+
 @Component({
   selector: 'app-product-detail',
   standalone: true,
@@ -11,12 +12,12 @@ import { API_BASE_URL } from '../../config/api.config';
   <div class="container" *ngIf="product">
 
     <div class="left">
-      <img [src]="${API_BASE_URL}" + product.imageUrl" class="main-img"/>
+      <img [src]="API_BASE_URL + product.imageUrl" class="main-img"/>
 
       <div class="thumbs">
         <img *ngFor="let img of images"
-             [src]="${API_BASE_URL}" + img.imageUrl"
-             (click)="product.imageUrl = img.imageUrl">
+             [src]="API_BASE_URL + img.imageUrl"
+             (click)="product.imageUrl = img.imageUrl"/>
       </div>
     </div>
 
@@ -77,34 +78,29 @@ export class ProductDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.id = Number(this.route.snapshot.paramMap.get('id'));
-
     this.loadProduct();
     this.loadImages();
   }
 
   loadProduct() {
-    this.http.get(`https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/products/${this.id}`)
+    this.http.get(`${API_BASE_URL}/api/products/${this.id}`)
       .subscribe(res => this.product = res);
   }
 
   loadImages() {
-    this.http.get<any[]>(`https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/ProductImages?productId=${this.id}`)
+    this.http.get<any[]>(`${API_BASE_URL}/api/ProductImages?productId=${this.id}`)
       .subscribe(res => this.images = res);
   }
 
   addToCart() {
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
     const index = cart.findIndex((x: any) => x.productID === this.product.productID);
-
     if (index > -1) {
       cart[index].quantity += 1;
     } else {
       cart.push({ ...this.product, quantity: 1 });
     }
-
     localStorage.setItem('cart', JSON.stringify(cart));
-
     alert('✅ Đã thêm vào giỏ hàng');
   }
 }
