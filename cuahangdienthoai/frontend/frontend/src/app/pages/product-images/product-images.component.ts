@@ -32,7 +32,7 @@ export class ProductImagesComponent {
   isEditing                 = false;
   editImageId: number | null = null;
   isDragOver                = false;
-
+  readonly baseUrl = API_BASE_URL;
   toast: Toast = { show: false, message: '', type: 'success' };
 
   readonly PAGE_SIZE = 20;
