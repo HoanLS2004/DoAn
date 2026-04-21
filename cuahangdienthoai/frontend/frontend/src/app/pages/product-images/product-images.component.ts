@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
 import { API_BASE_URL } from '../../config/api.config';
+
 interface Toast {
   show: boolean;
   message: string;
@@ -34,7 +35,6 @@ export class ProductImagesComponent {
 
   toast: Toast = { show: false, message: '', type: 'success' };
 
-  // ── Pagination ───────────────────────────────────────────
   readonly PAGE_SIZE = 20;
   currentPage = 1;
 
@@ -62,7 +62,6 @@ export class ProductImagesComponent {
   goPage(p: number): void {
     if (p >= 1 && p <= this.totalPages) this.currentPage = p;
   }
-  // ─────────────────────────────────────────────────────────
 
   private readonly API = `${API_BASE_URL}/api/productimages`;
 
@@ -80,7 +79,6 @@ export class ProductImagesComponent {
     this.loadImages();
   }
 
-  // ── FILE SELECT ──────────────────────────────────────────
   onFileSelected(event: any): void {
     this.selectedFile = event.target.files[0] ?? null;
     this._generatePreview(this.selectedFile);
@@ -100,7 +98,6 @@ export class ProductImagesComponent {
     reader.readAsDataURL(file);
   }
 
-  // ── SAVE (upload or update) ───────────────────────────────
   saveImage(): void {
     if (!this.uploadForm.value.productId) {
       this.showToast('Vui lòng nhập Product ID!', 'error');
@@ -118,7 +115,7 @@ export class ProductImagesComponent {
     if (this.selectedFile) formData.append('File', this.selectedFile);
 
     if (this.isEditing && this.editImageId) {
-      this.http.put(`${this.API}/api/productimages/${this.editImageId}`, formData, { headers })
+      this.http.put(`${this.API}/${this.editImageId}`, formData, { headers })
         .subscribe({
           next: () => {
             this.showToast('💾 Cập nhật hình ảnh thành công!', 'success');
@@ -131,7 +128,7 @@ export class ProductImagesComponent {
           },
         });
     } else {
-      this.http.post(`${this.API}/api/productimages`, formData, {
+      this.http.post(this.API, formData, {
         headers,
         reportProgress: true,
         observe: 'events',
@@ -153,9 +150,8 @@ export class ProductImagesComponent {
     }
   }
 
-  // ── LOAD LIST ────────────────────────────────────────────
   loadImages(): void {
-    this.http.get<any[]>(`${this.API}/api/productimages`).subscribe({
+    this.http.get<any[]>(this.API).subscribe({
       next: res => {
         this.images = [...res];
         this._applyFilter();
@@ -165,7 +161,6 @@ export class ProductImagesComponent {
     });
   }
 
-  // ── DELETE ───────────────────────────────────────────────
   deleteImage(id: number): void {
     const img = this.images.find(i => i.imageID === id);
     if (!confirm(`Xóa hình ảnh #${id} (Sản phẩm ${img?.productID})?`)) return;
@@ -173,7 +168,7 @@ export class ProductImagesComponent {
     const token   = localStorage.getItem('token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-    this.http.delete(`${this.API}/api/productimages/${id}`, { headers }).subscribe({
+    this.http.delete(`${this.API}/${id}`, { headers }).subscribe({
       next: () => {
         this.images = this.images.filter(i => i.imageID !== id);
         this._applyFilter();
@@ -183,12 +178,11 @@ export class ProductImagesComponent {
     });
   }
 
-  // ── SET THUMBNAIL ────────────────────────────────────────
   setThumbnail(id: number): void {
     const token   = localStorage.getItem('token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-    this.http.put(`${this.API}/api/productimages/set-thumbnail/${id}`, {}, { headers }).subscribe({
+    this.http.put(`${this.API}/set-thumbnail/${id}`, {}, { headers }).subscribe({
       next: () => {
         this.images = this.images.map(img => ({
           ...img,
@@ -201,12 +195,11 @@ export class ProductImagesComponent {
     });
   }
 
-  // ── EDIT ─────────────────────────────────────────────────
   editImage(img: any): void {
     this.isEditing   = true;
     this.editImageId = img.imageID;
     this.selectedFile = null;
-    this.previews    = [`${this.API}${img.imageUrl}`];
+    this.previews    = [`${API_BASE_URL}${img.imageUrl}`];
 
     this.uploadForm.patchValue({
       productId:   img.productID,
@@ -216,7 +209,6 @@ export class ProductImagesComponent {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ── RESET FORM ───────────────────────────────────────────
   resetForm(): void {
     this.isEditing     = false;
     this.editImageId   = null;
@@ -227,10 +219,7 @@ export class ProductImagesComponent {
     this.uploadForm.reset({ productId: '', file: null, isThumbnail: false });
   }
 
-
-  onSearch(): void {
-    this._applyFilter();
-  }
+  onSearch(): void { this._applyFilter(); }
 
   clearSearch(): void {
     this.searchTerm = '';
@@ -249,7 +238,6 @@ export class ProductImagesComponent {
     this.cdr.detectChanges();
   }
 
-  // ── STAT HELPERS ─────────────────────────────────────────
   countThumbnails(): number {
     return this.images.filter(img => img.isThumbnail).length;
   }
@@ -258,13 +246,11 @@ export class ProductImagesComponent {
     return new Set(this.images.map(img => img.productID)).size;
   }
 
-  // ── ESC close ────────────────────────────────────────────
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.isEditing) this.resetForm();
   }
 
-  // ── TOAST ────────────────────────────────────────────────
   private showToast(message: string, type: 'success' | 'error'): void {
     this.toast = { show: true, message, type };
     setTimeout(() => (this.toast.show = false), 2800);
