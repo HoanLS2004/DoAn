@@ -18,35 +18,31 @@ interface Toast { show: boolean; message: string; type: 'success' | 'error'; }
 export class ProductDetailuserComponent implements OnInit {
 
   product:   any;
-  images:    any[] = [];   
+  images:    any[] = [];
   reviews:   any[] = [];
   avgRating  = 0;
   productId!: number;
   cartCount  = 0;
-  stockQuantity = 0; 
-
+  stockQuantity = 0;
 
   allImages:   string[] = [];
-  activeIdx    = 0;       // index ảnh chính đang hiện
-  thumbOffset  = 0;       // số thumbnail bị cuộn sang trái
-
+  activeIdx    = 0;
+  thumbOffset  = 0;
 
   lightboxOpen  = false;
   lightboxIndex = 0;
 
- 
   quantity    = 1;
   wished      = false;
   hoverRating = 0;
   newReview   = { rating: 5, comment: '', userName: '' };
   toast: Toast = { show: false, message: '', type: 'success' };
 
-  
   productConfig: any = null;
   configPopup    = false;
 
   private readonly API = `${API_BASE_URL}`;
-  private readonly THUMB_VISIBLE = 6; 
+  private readonly THUMB_VISIBLE = 6;
 
   constructor(
     private route: ActivatedRoute,
@@ -62,7 +58,6 @@ export class ProductDetailuserComponent implements OnInit {
     this.loadConfig();
   }
 
-
   loadConfig(): void {
     this.http.get(`${this.API}/api/ProductConfigurations/product/${this.productId}`)
       .subscribe({
@@ -70,8 +65,6 @@ export class ProductDetailuserComponent implements OnInit {
         error: () => { this.productConfig = null; },
       });
   }
-
-
 
   getConfigGroups(): { icon: string; title: string; rows: { label: string; value: string; icon: string }[] }[] {
     const cfg = this.productConfig;
@@ -81,39 +74,39 @@ export class ProductDetailuserComponent implements OnInit {
       {
         icon: '📱', title: 'Màn hình & Thiết kế',
         rows: [
-          { icon: '🖥️', label: 'Màn hình',      value: v(cfg.screen) },
-          { icon: '🔄', label: 'Tần số quét',    value: v(cfg.refreshRate) },
-          { icon: '🎨', label: 'Màu sắc',         value: v(cfg.color) },
-          { icon: '🏗️', label: 'Thiết kế',        value: v(cfg.design) },
-          { icon: '⚖️', label: 'Trọng lượng',    value: v(cfg.weight) },
-          { icon: '💧', label: 'Kháng nước',      value: v(cfg.waterResistance) },
+          { icon: '🖥️', label: 'Màn hình',        value: v(cfg.screen) },
+          { icon: '🔄', label: 'Tần số quét',      value: v(cfg.refreshRate) },
+          { icon: '🎨', label: 'Màu sắc',           value: v(cfg.color) },
+          { icon: '🏗️', label: 'Thiết kế',          value: v(cfg.design) },
+          { icon: '⚖️', label: 'Trọng lượng',      value: v(cfg.weight) },
+          { icon: '💧', label: 'Kháng nước',        value: v(cfg.waterResistance) },
         ]
       },
       {
         icon: '🚀', title: 'Hiệu năng',
         rows: [
-          { icon: '⚡', label: 'CPU / Chip',      value: v(cfg.cpu) },
-          { icon: '🎮', label: 'GPU',              value: v(cfg.gpu) },
-          { icon: '🧠', label: 'RAM',              value: v(cfg.ram) },
-          { icon: '💾', label: 'Bộ nhớ trong',    value: v(cfg.internalStorage) },
-          { icon: '📲', label: 'Hệ điều hành',    value: v(cfg.operatingSystem) },
+          { icon: '⚡', label: 'CPU / Chip',        value: v(cfg.cpu) },
+          { icon: '🎮', label: 'GPU',                value: v(cfg.gpu) },
+          { icon: '🧠', label: 'RAM',                value: v(cfg.ram) },
+          { icon: '💾', label: 'Bộ nhớ trong',      value: v(cfg.internalStorage) },
+          { icon: '📲', label: 'Hệ điều hành',      value: v(cfg.operatingSystem) },
         ]
       },
       {
         icon: '📷', title: 'Camera',
         rows: [
-          { icon: '📷', label: 'Camera sau',      value: v(cfg.rearCamera) },
-          { icon: '🤳', label: 'Camera trước',    value: v(cfg.frontCamera) },
+          { icon: '📷', label: 'Camera sau',        value: v(cfg.rearCamera) },
+          { icon: '🤳', label: 'Camera trước',      value: v(cfg.frontCamera) },
         ]
       },
       {
         icon: '📡', title: 'Kết nối & Pin',
         rows: [
-          { icon: '📶', label: 'Mạng',             value: v(cfg.network) },
-          { icon: '📲', label: 'SIM',               value: v(cfg.sim) },
-          { icon: '🔋', label: 'Dung lượng pin',   value: v(cfg.battery) },
-          { icon: '⚡', label: 'Sạc',              value: v(cfg.charging) },
-          { icon: '👆', label: 'Bảo mật sinh trắc', value: v(cfg.fingerprint) },
+          { icon: '📶', label: 'Mạng',               value: v(cfg.network) },
+          { icon: '📲', label: 'SIM',                 value: v(cfg.sim) },
+          { icon: '🔋', label: 'Dung lượng pin',     value: v(cfg.battery) },
+          { icon: '⚡', label: 'Sạc',                value: v(cfg.charging) },
+          { icon: '👆', label: 'Bảo mật sinh trắc',  value: v(cfg.fingerprint) },
         ]
       },
     ];
@@ -123,26 +116,20 @@ export class ProductDetailuserComponent implements OnInit {
     this.http.get(`${this.API}/api/products/${this.productId}`).subscribe({
       next: (res: any) => {
         this.product = res;
-        
-     
         this.stockQuantity = Number(res.stockQuantity ?? res.StockQuantity ?? 0);
-        
-        
         const embedded = res.images ?? res.productImages ?? res.imageList ?? [];
         if (embedded.length > 0) {
           this.images = embedded;
           this.buildAllImages();
           this.cdr.detectChanges();
         } else {
-        
-          this.buildAllImages(); 
+          this.buildAllImages();
           this.cdr.detectChanges();
-          this.loadImages();   
+          this.loadImages();
         }
       },
     });
   }
-
 
   loadImages(): void {
     this.http.get<any[]>(`${this.API}/api/ProductImages?productId=${this.productId}`)
@@ -195,12 +182,12 @@ export class ProductDetailuserComponent implements OnInit {
   }
 
   loadReviews(): void {
-    this.http.get<any>(`${this.API}/reviews/product/${this.productId}`).subscribe({
+    this.http.get<any>(`${this.API}/api/reviews/product/${this.productId}`).subscribe({
       next: (reviewsRes) => {
         const reviews = Array.isArray(reviewsRes) ? reviewsRes : reviewsRes?.data ?? [];
         if (!reviews.length) { this.reviews = []; return; }
 
-        this.http.get<any>(`${this.API}/users`).subscribe({
+        this.http.get<any>(`${this.API}/api/users`).subscribe({
           next: (usersRes) => {
             const users = Array.isArray(usersRes) ? usersRes : usersRes?.data ?? [];
             this.reviews = reviews.map((r: any) => {
@@ -220,14 +207,13 @@ export class ProductDetailuserComponent implements OnInit {
   }
 
   loadAvgRating(): void {
-    this.http.get(`${this.API}/reviews/avg/${this.productId}`).subscribe({
+    this.http.get(`${this.API}/api/reviews/avg/${this.productId}`).subscribe({
       next: (res: any) => { this.avgRating = res.averageRating ?? 0; this.cdr.detectChanges(); },
     });
   }
 
   selectImg(idx: number): void {
     this.activeIdx = idx;
-    // tự động cuộn strip để thumbnail được chọn luôn hiện
     if (idx < this.thumbOffset) this.thumbOffset = idx;
     if (idx >= this.thumbOffset + this.THUMB_VISIBLE)
       this.thumbOffset = idx - this.THUMB_VISIBLE + 1;
@@ -277,16 +263,11 @@ export class ProductDetailuserComponent implements OnInit {
 
   changeQty(delta: number): void {
     const newQty = this.quantity + delta;
-    
     if (newQty > this.stockQuantity) {
       this.showToast(`⚠️ Chỉ còn ${this.stockQuantity} sản phẩm trong kho!`, 'error');
       return;
     }
-    
-    if (newQty < 1) {
-      return;
-    }
-    
+    if (newQty < 1) return;
     this.quantity = newQty;
   }
 
@@ -295,26 +276,35 @@ export class ProductDetailuserComponent implements OnInit {
       this.quantity = this.stockQuantity;
       this.showToast(`⚠️ Chỉ còn ${this.stockQuantity} sản phẩm trong kho!`, 'error');
     }
-    if (this.quantity < 1) {
-      this.quantity = 1;
-    }
+    if (this.quantity < 1) this.quantity = 1;
   }
 
   addToCart(): void {
-    // Kiểm tra tồn kho trước khi thêm
     if (this.quantity > this.stockQuantity) {
       this.showToast(`⚠️ Chỉ còn ${this.stockQuantity} sản phẩm trong kho!`, 'error');
       return;
     }
 
-    this.http.post(`${this.API}/cart/add?productId=${this.productId}&quantity=${this.quantity}`, {})
-      .subscribe({
-        next:  () => { this.cartCount += this.quantity; this.showToast(`✅ Đã thêm ${this.quantity} sản phẩm vào giỏ hàng!`, 'success'); },
-        error: (err) => {
-          const msg = err?.error?.message ?? 'Thêm giỏ hàng thất bại';
-          this.showToast(`❌ ${msg}`, 'error');
-        },
-      });
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.showToast('❌ Vui lòng đăng nhập!', 'error');
+      return;
+    }
+
+    this.http.post(
+      `${this.API}/api/cart/add?productId=${this.productId}&quantity=${this.quantity}`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe({
+      next:  () => {
+        this.cartCount += this.quantity;
+        this.showToast(`✅ Đã thêm ${this.quantity} sản phẩm vào giỏ hàng!`, 'success');
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Thêm giỏ hàng thất bại';
+        this.showToast(`❌ ${msg}`, 'error');
+      },
+    });
   }
 
   buyNow(): void {
@@ -322,7 +312,6 @@ export class ProductDetailuserComponent implements OnInit {
       this.showToast(`⚠️ Chỉ còn ${this.stockQuantity} sản phẩm trong kho!`, 'error');
       return;
     }
-
     this.addToCart();
     setTimeout(() => window.location.href = '/cart', 800);
   }
@@ -348,9 +337,9 @@ export class ProductDetailuserComponent implements OnInit {
       comment:   this.newReview.comment.trim(),
     };
 
-    const headers = { Authorization: `Bearer ${token}` };
-
-    this.http.post(`${this.API}/reviews`, payload, { headers }).subscribe({
+    this.http.post(`${this.API}/api/reviews`, payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
       next: () => {
         this.showToast('⭐ Gửi đánh giá thành công!', 'success');
         this.newReview = { rating: 5, comment: '', userName: '' };
@@ -365,7 +354,7 @@ export class ProductDetailuserComponent implements OnInit {
         }
       },
     });
-}
+  }
 
   getUrl(path: string): string {
     if (!path) return 'assets/no-image.jpg';
@@ -396,9 +385,8 @@ export class ProductDetailuserComponent implements OnInit {
   private showToast(msg: string, type: 'success' | 'error'): void {
     this.toast = { show: true, message: msg, type };
     this.cdr.detectChanges();
-    setTimeout(() => 
-    {
-      this.toast.show = false; 
+    setTimeout(() => {
+      this.toast.show = false;
       this.cdr.detectChanges();
     }, 2800);
   }
