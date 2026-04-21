@@ -37,7 +37,7 @@ export class ShoppingCartService {
 
   addToCart(productId: number) {
   return this.http.post(
-    `${this.apiUrl}/add?productId=${productId}&quantity=1`,
+    `${this.apiUrl}/api/add?productId=${productId}&quantity=1`,
     {},
     this.getAuthHeaders()
   );

@@ -210,7 +210,6 @@ export class HomeUserComponent implements OnInit {
       this.activeSupport = this.activeSupport === item.key ? null : item.key;
     }
   ngOnInit(): void {
-    this.loadBanners();
     this.loadProducts();
     this.loadConfigs();
     this.loadSoldCounts();
@@ -244,11 +243,6 @@ export class HomeUserComponent implements OnInit {
   }
 
   // ── LOAD DATA ─────────────────────────────────────────────
-  loadBanners(): void {
-    this.http.get<any[]>(`${this.API}/api/HomeBanner/banners`).subscribe({
-      next: res => (this.banners = res),
-    });
-  }
 
   loadProducts(): void {
     this.productService.getProducts(this.search).subscribe({
@@ -449,9 +443,10 @@ export class HomeUserComponent implements OnInit {
   }
 
   getImage(p: any): string {
-    if (p?.thumbnailUrl) return `${this.API}${p.thumbnailUrl}`;
-    if (p?.imageUrl)     return `${this.API}${p.imageUrl}`;
-    return 'assets/no-image.jpg';
+    const url = p?.thumbnailUrl ?? p?.imageUrl;
+    if (!url) return 'assets/no-image.jpg';
+    if (url.startsWith('http')) return url;      
+    return `${this.API}${url}`;            
   }
 
   onImgErr(e: Event): void {
