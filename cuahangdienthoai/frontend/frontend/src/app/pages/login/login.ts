@@ -156,7 +156,7 @@ export class LoginComponent implements AfterViewInit {
     }
 
     this.http
-      .post<{ token: string; role: string }>(`${API_BASE_URL}/api/auth/login`, {
+      .post<{ token: string; role: string }>(`${API_BASE_URL}/auth/login`, {
         email: this.email,
         password: this.password,
       })

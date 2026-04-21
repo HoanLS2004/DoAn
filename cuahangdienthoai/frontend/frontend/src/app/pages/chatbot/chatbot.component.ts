@@ -41,7 +41,7 @@ export class ChatbotComponent {
     this.typing   = true;
     this.scroll();
 
-    this.http.post<{ reply: string }>(`${API_BASE_URL}/api/chat`, { message: text })
+    this.http.post<{ reply: string }>(`${API_BASE_URL}/chat`, { message: text })
       .subscribe({
         next: res => {
           this.typing   = false;

@@ -195,12 +195,12 @@ export class ProductDetailuserComponent implements OnInit {
   }
 
   loadReviews(): void {
-    this.http.get<any>(`${this.API}/api/reviews/product/${this.productId}`).subscribe({
+    this.http.get<any>(`${this.API}/reviews/product/${this.productId}`).subscribe({
       next: (reviewsRes) => {
         const reviews = Array.isArray(reviewsRes) ? reviewsRes : reviewsRes?.data ?? [];
         if (!reviews.length) { this.reviews = []; return; }
 
-        this.http.get<any>(`${this.API}/api/users`).subscribe({
+        this.http.get<any>(`${this.API}/users`).subscribe({
           next: (usersRes) => {
             const users = Array.isArray(usersRes) ? usersRes : usersRes?.data ?? [];
             this.reviews = reviews.map((r: any) => {
@@ -220,7 +220,7 @@ export class ProductDetailuserComponent implements OnInit {
   }
 
   loadAvgRating(): void {
-    this.http.get(`${this.API}/api/reviews/avg/${this.productId}`).subscribe({
+    this.http.get(`${this.API}/reviews/avg/${this.productId}`).subscribe({
       next: (res: any) => { this.avgRating = res.averageRating ?? 0; this.cdr.detectChanges(); },
     });
   }
@@ -307,7 +307,7 @@ export class ProductDetailuserComponent implements OnInit {
       return;
     }
 
-    this.http.post(`${this.API}/api/cart/add?productId=${this.productId}&quantity=${this.quantity}`, {})
+    this.http.post(`${this.API}/cart/add?productId=${this.productId}&quantity=${this.quantity}`, {})
       .subscribe({
         next:  () => { this.cartCount += this.quantity; this.showToast(`✅ Đã thêm ${this.quantity} sản phẩm vào giỏ hàng!`, 'success'); },
         error: (err) => {
@@ -350,7 +350,7 @@ export class ProductDetailuserComponent implements OnInit {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    this.http.post(`${this.API}/api/reviews`, payload, { headers }).subscribe({
+    this.http.post(`${this.API}/reviews`, payload, { headers }).subscribe({
       next: () => {
         this.showToast('⭐ Gửi đánh giá thành công!', 'success');
         this.newReview = { rating: 5, comment: '', userName: '' };

@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Order } from './order.model';
-
+import { API_BASE_URL } from '../../config/api.config';
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private apiUrl = 'https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/orders'; // 🔥 thống nhất
+  private apiUrl = `${API_BASE_URL}/orders`; 
 
   constructor(private http: HttpClient) {}
 

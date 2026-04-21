@@ -4,7 +4,7 @@ import { Brand } from './brand.model';
 import { API_BASE_URL } from '../../config/api.config';
 @Injectable({ providedIn: 'root' })
 export class BrandService {
-  private apiUrl = `${API_BASE_URL}/api/brands`;
+  private apiUrl = `${API_BASE_URL}/brands`;
 
   constructor(private http: HttpClient) {}
 

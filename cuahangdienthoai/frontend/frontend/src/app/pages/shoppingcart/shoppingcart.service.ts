@@ -18,7 +18,7 @@ export interface ShoppingCart {
 })
 export class ShoppingCartService {
 
-  private apiUrl = `${API_BASE_URL}/api/cart`;
+  private apiUrl = `${API_BASE_URL}/cart`;
 
   constructor(private http: HttpClient) {}
 

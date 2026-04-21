@@ -57,7 +57,7 @@ export class HomeUserComponent implements OnInit {
   reviewCountMap: Map<number, number> = new Map();
   ramRomMap: Map<number, string> = new Map();
 
-  private readonly API = `${API_BASE_URL}/api`;
+  private readonly API = `${API_BASE_URL}`;
 
   constructor(
     private http:           HttpClient,

@@ -46,7 +46,7 @@ export class CheckoutComponent implements OnInit {
 
   toast: Toast = { show: false, message: '', type: 'success' };
 
-  private readonly API = `${API_BASE_URL}/api`;
+  private readonly API = `${API_BASE_URL}`;
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 

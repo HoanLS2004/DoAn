@@ -64,7 +64,7 @@ export class ProductImagesComponent {
   }
   // ─────────────────────────────────────────────────────────
 
-  private readonly API = `${API_BASE_URL}/api/productimages`;
+  private readonly API = `${API_BASE_URL}/productimages`;
 
   constructor(
     private fb: FormBuilder,

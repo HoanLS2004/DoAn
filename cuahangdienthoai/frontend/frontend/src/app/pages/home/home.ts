@@ -66,7 +66,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserInfo();
 
-    this.http.get<any[]>(`${API_BASE_URL}/api/HomeBanner/banners`).subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/HomeBanner/banners`).subscribe({
       next: data => { this.banners = data.map(b => ({ ...b, LinkUrl: b.LinkUrl || '/' })); },
       error: err  => console.error('Failed to load banners', err),
     });

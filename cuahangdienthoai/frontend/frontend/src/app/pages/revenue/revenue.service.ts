@@ -10,7 +10,7 @@ export interface RevenueDto {
 
 @Injectable({ providedIn: 'root' })
 export class RevenueService {
-  private apiUrl = `${API_BASE_URL}/api/revenue`;
+  private apiUrl = `${API_BASE_URL}/revenue`;
 
   constructor(private http: HttpClient) {}
 

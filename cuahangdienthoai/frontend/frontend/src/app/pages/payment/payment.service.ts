@@ -15,7 +15,7 @@ export interface Payment {
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
 
-  private api = `${API_BASE_URL}/api/payments`;
+  private api = `${API_BASE_URL}/payments`;
 
   constructor(private http: HttpClient) {}
 
