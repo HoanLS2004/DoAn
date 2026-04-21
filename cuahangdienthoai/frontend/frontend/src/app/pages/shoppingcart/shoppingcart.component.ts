@@ -212,4 +212,9 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
     this.toast = { show: true, message: msg, type };
     setTimeout(() => (this.toast.show = false), 2800);
   }
+  getThumbUrl(thumbnail: string): string {
+      if (!thumbnail) return 'assets/no-image.png';
+      if (thumbnail.startsWith('http')) return thumbnail;
+      return 'https://inconceivable-matrilineal-gaylene.ngrok-free.dev' + thumbnail;
+    }
 }

@@ -92,14 +92,18 @@ export class ProductDetailComponent implements OnInit {
       .subscribe(res => this.images = res);
   }
   addToCart() {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const index = cart.findIndex((x: any) => x.productID === this.product.productID);
-    if (index > -1) {
-      cart[index].quantity += 1;
-    } else {
-      cart.push({ ...this.product, quantity: 1 });
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Vui lòng đăng nhập!');
+      return;
     }
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert('✅ Đã thêm vào giỏ hàng');
+    this.http.post(
+      `${API_BASE_URL}/api/cart/add?productId=${this.product.productID}&quantity=1`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe({
+      next: () => alert('✅ Đã thêm vào giỏ hàng'),
+      error: () => alert('❌ Thêm thất bại')
+    });
   }
 }
