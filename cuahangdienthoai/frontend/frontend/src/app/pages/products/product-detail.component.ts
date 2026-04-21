@@ -71,6 +71,7 @@ export class ProductDetailComponent implements OnInit {
   product: any;
   images: any[] = [];
   id!: number;
+  API_BASE_URL = API_BASE_URL;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) {}
 
