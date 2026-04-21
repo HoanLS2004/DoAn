@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../config/api.config';
+
 @Component({
   selector: 'app-product-list',
   standalone: true,
@@ -13,7 +14,7 @@ import { API_BASE_URL } from '../../config/api.config';
 
     <div class="grid">
       <div class="card" *ngFor="let p of products">
-        <img [src]="${API_BASE_URL}" + (p.thumbnailUrl || '/uploads/default.png')" />
+        <img [src]="API_BASE_URL + (p.thumbnailUrl || '/uploads/default.png')" />
 
         <h3>{{ p.name }}</h3>
 
@@ -45,20 +46,14 @@ import { API_BASE_URL } from '../../config/api.config';
       height: 150px;
       object-fit: cover;
     }
-    .price {
-      color: red;
-      font-weight: bold;
-    }
-    button {
-      margin: 5px;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
+    .price { color: red; font-weight: bold; }
+    button { margin: 5px; padding: 5px 10px; cursor: pointer; }
   `]
 })
 export class ProductListComponent implements OnInit {
 
   products: any[] = [];
+  API_BASE_URL = API_BASE_URL; 
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -75,17 +70,13 @@ export class ProductListComponent implements OnInit {
 
   addToCart(product: any) {
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
     const index = cart.findIndex((x: any) => x.productID === product.productID);
-
     if (index > -1) {
       cart[index].quantity += 1;
     } else {
       cart.push({ ...product, quantity: 1 });
     }
-
     localStorage.setItem('cart', JSON.stringify(cart));
-
     alert('✅ Đã thêm vào giỏ hàng');
   }
 }
