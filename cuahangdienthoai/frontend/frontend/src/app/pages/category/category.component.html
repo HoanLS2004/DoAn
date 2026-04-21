@@ -1,0 +1,258 @@
+<!-- category.component.html -->
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-brand-icon">🗂️</div>
+    <div>
+      <div class="topbar-brand-name">Tuan Anh Mobile</div>
+      <div class="topbar-brand-sub">Quản lý danh mục</div>
+    </div>
+  </div>
+  <div class="topbar-nav">
+    <span class="topbar-nav-item active">Danh mục sản phẩm</span>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    <span>Admin</span>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  <span class="toast-ico">{{ toast.type === 'success' ? '✅' : '❌' }}</span>
+  {{ toast.message }}
+</div>
+
+<!-- ══ POPUP XEM CHI TIẾT ══ -->
+<div class="popup-overlay" [class.show]="viewPopup.show" (click)="closeViewPopup()">
+  <div class="popup-box" (click)="$event.stopPropagation()">
+    <div class="pop-head preview-h">
+      <div class="pop-head-ico">🗂️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Chi tiết danh mục</div>
+        <div class="pop-head-sub">{{ viewPopup.cat?.categoryID }}</div>
+      </div>
+      <button class="pop-close" (click)="closeViewPopup()">✕</button>
+    </div>
+    <div class="pop-body" *ngIf="viewPopup.cat">
+      <div class="cat-preview-head">
+        <div class="cat-big-icon">🗂️</div>
+        <div>
+          <div class="cat-preview-name">{{ viewPopup.cat.name }}</div>
+          <div class="cat-preview-id">ID: {{ viewPopup.cat.categoryID }}</div>
+          <div class="cat-preview-desc">{{ viewPopup.cat.description || 'Chưa có mô tả' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeViewPopup()">Đóng</button>
+      <button class="pbtn pbtn-blue" (click)="editFromView(viewPopup.cat)">✏️ Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP THÊM / SỬA ══ -->
+<div class="popup-overlay" [class.show]="formPopup.show" (click)="closeFormPopup()">
+  <div class="popup-box" (click)="$event.stopPropagation()">
+    <div class="pop-head" [ngClass]="isEdit ? 'edit-h' : 'create-h'">
+      <div class="pop-head-ico">{{ isEdit ? '✏️' : '➕' }}</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">{{ isEdit ? 'Cập nhật danh mục' : 'Thêm danh mục mới' }}</div>
+        <div class="pop-head-sub">{{ isEdit ? 'Chỉnh sửa thông tin danh mục' : 'Nhập thông tin danh mục mới' }}</div>
+      </div>
+      <button class="pop-close" (click)="closeFormPopup()">✕</button>
+    </div>
+
+    <div class="pop-scroll">
+      <div class="form-section">
+        <div class="form-section-title">📋 Thông tin danh mục</div>
+
+        <div class="form-field">
+          <label>ID Danh mục <span class="req">*</span></label>
+          <input [(ngModel)]="form.categoryID"
+            placeholder="VD: DM001"
+            [disabled]="isEdit"/>
+        </div>
+
+        <div class="form-field">
+          <label>Tên danh mục <span class="req">*</span></label>
+          <input [(ngModel)]="form.name"
+            placeholder="VD: Điện thoại, Laptop, Phụ kiện..."/>
+        </div>
+
+        <div class="form-field">
+          <label>Mô tả</label>
+          <textarea [(ngModel)]="form.description"
+            placeholder="Mô tả ngắn về danh mục này..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeFormPopup()">Hủy</button>
+      <button class="pbtn" [ngClass]="isEdit ? 'pbtn-blue' : 'pbtn-green'"
+        (click)="isEdit ? update() : create()"
+        [disabled]="formPopup.loading || !form.categoryID?.trim() || !form.name?.trim()">
+        <span class="spinner" *ngIf="formPopup.loading"></span>
+        {{ isEdit ? '💾 Lưu cập nhật' : '➕ Thêm mới' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP XÓA ══ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" style="max-width:420px" (click)="$event.stopPropagation()">
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Xóa danh mục</div>
+        <div class="pop-head-sub">Không thể hoàn tác hành động này</div>
+      </div>
+      <button class="pop-close" (click)="closeDelPopup()">✕</button>
+    </div>
+    <div class="pop-body">
+      <div class="del-preview">
+        <div class="del-ico">🗂️</div>
+        <div>
+          <div class="del-name">{{ delPopup.name }}</div>
+          <div class="del-sub">ID: {{ delPopup.id }}</div>
+        </div>
+      </div>
+      <div class="del-warn">⚠️ Danh mục sẽ bị xóa vĩnh viễn và không thể khôi phục.</div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeDelPopup()">Hủy</button>
+      <button class="pbtn pbtn-red" (click)="confirmDelete()" [disabled]="delPopup.loading">
+        <span class="spinner" *ngIf="delPopup.loading"></span>
+        🗑️ Xóa ngay
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE ══ -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">🗂️ Quản lý danh mục</div>
+      <div class="page-sub">Thêm, sửa, xóa danh mục sản phẩm</div>
+    </div>
+    <button class="btn-add" (click)="openAddPopup()">
+      <span>➕</span> Thêm danh mục
+    </button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#fff0f1">🗂️</div>
+      <div>
+        <div class="stat-val">{{ categories.length }}</div>
+        <div class="stat-lbl">Tổng danh mục</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#edfaf3">✅</div>
+      <div>
+        <div class="stat-val">{{ countWithDesc() }}</div>
+        <div class="stat-lbl">Có mô tả</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#eff6ff">🔍</div>
+      <div>
+        <div class="stat-val">{{ filteredCategories.length }}</div>
+        <div class="stat-lbl">Kết quả tìm kiếm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div class="card">
+    <div class="card-body search-row">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input class="search-input" [(ngModel)]="searchText"
+          (input)="onSearch()" placeholder="Tìm theo tên danh mục, ID..."/>
+        <button class="search-clear" *ngIf="searchText" (click)="clearSearch()">✕</button>
+      </div>
+      <div class="search-count" *ngIf="searchText">{{ filteredCategories.length }} kết quả</div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-title-dot"></span>
+        Danh sách danh mục
+      </div>
+      <span class="badge-count">{{ filteredCategories.length }}</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên danh mục</th>
+            <th>Mô tả</th>
+            <th style="text-align:center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="pagedCategories.length > 0; else emptyTpl">
+            <tr *ngFor="let c of pagedCategories" (click)="openViewPopup(c)">
+              <td><span class="cell-id">{{ c.categoryID }}</span></td>
+              <td><span class="cell-name">{{ c.name }}</span></td>
+              <td><span class="cell-desc">{{ c.description || '—' }}</span></td>
+              <td (click)="$event.stopPropagation()">
+                <div class="cell-actions">
+                  <button class="btn-icon-edit" (click)="openEditPopup(c)"  title="Sửa">✏️</button>
+                  <button class="btn-icon-del"  (click)="openDelPopup(c)"   title="Xóa">🗑</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #emptyTpl>
+            <tr>
+              <td colspan="4">
+                <div class="empty-state">
+                  <div class="empty-ico">🗂️</div>
+                  <p>Chưa có danh mục nào</p>
+                  <button class="btn-add-sm" (click)="openAddPopup()">➕ Thêm danh mục đầu tiên</button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="filteredCategories.length > 0">
+      <div class="pag-info">Trang {{ currentPage }}/{{ totalPages }} · {{ filteredCategories.length }} danh mục</div>
+      <div class="pag-btns">
+        <button class="pag-btn" (click)="goPage(1)"             [disabled]="currentPage===1">«</button>
+        <button class="pag-btn" (click)="goPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+        <ng-container *ngFor="let p of pageNumbers()">
+          <span class="pag-ellipsis" *ngIf="p===-1">…</span>
+          <button class="pag-btn" *ngIf="p!==-1"
+            [class.active]="p===currentPage" (click)="goPage(p)">{{ p }}</button>
+        </ng-container>
+        <button class="pag-btn" (click)="goPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
+        <button class="pag-btn" (click)="goPage(totalPages)"    [disabled]="currentPage===totalPages">»</button>
+      </div>
+    </div>
+
+    <div class="table-footer">
+      <span>Hiển thị {{ pagedCategories.length }}/{{ filteredCategories.length }} danh mục</span>
+      <span>Tuan Anh Mobile · Category Manager v2.0</span>
+    </div>
+  </div>
+
+</div><!-- /page -->

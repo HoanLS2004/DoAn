@@ -1,0 +1,281 @@
+<!-- revenue.component.html -->
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-box">
+      <svg viewBox="0 0 24 24"><path d="M3.5 18.5l6-6 4 4L22 6.92M22 6.92L17 7M22 6.92L21.08 12"/></svg>
+    </div>
+    Tuan Anh Mobile
+  </div>
+  <div class="topnav">
+    <div class="topnav-item active">Doanh thu</div>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    Admin
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title">Thống Kê Doanh Thu</div>
+    <div class="page-sub">{{ viewTypeLabel }}</div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+
+    <!-- Tổng doanh thu -->
+    <div class="stat-card">
+      <div class="stat-icon si-green">💰</div>
+      <div>
+        <div class="stat-val">{{ totalRevenue | number:'1.0-0' }}₫</div>
+        <div class="stat-lbl">Tổng doanh thu</div>
+      </div>
+    </div>
+
+    <!-- Tổng đơn hàng -->
+    <div class="stat-card">
+      <div class="stat-icon si-blue">🛒</div>
+      <div>
+        <div class="stat-val">{{ totalOrders | number:'1.0-0' }}</div>
+        <div class="stat-lbl">Tổng đơn hàng</div>
+      </div>
+    </div>
+
+    <!-- Số giờ/ngày/tháng có doanh thu -->
+    <div class="stat-card">
+      <div class="stat-icon si-orange">📊</div>
+      <div>
+        <div class="stat-val">{{ activeRows.length }}</div>
+        <div class="stat-lbl">
+          <ng-container [ngSwitch]="viewType">
+            <ng-container *ngSwitchCase="'day'">Giờ có doanh thu</ng-container>
+            <ng-container *ngSwitchCase="'month'">Ngày có doanh thu</ng-container>
+            <ng-container *ngSwitchDefault>Tháng có doanh thu</ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Doanh thu cao nhất -->
+    <div class="stat-card">
+      <div class="stat-icon si-red">🏆</div>
+      <div>
+        <div class="stat-val">{{ maxRevenue | number:'1.0-0' }}₫</div>
+        <div class="stat-lbl">
+          <ng-container [ngSwitch]="viewType">
+            <ng-container *ngSwitchCase="'day'">Cao nhất / giờ</ng-container>
+            <ng-container *ngSwitchCase="'month'">Cao nhất / ngày</ng-container>
+            <ng-container *ngSwitchDefault>Cao nhất / tháng</ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FILTER CARD -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-left">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 4h18v2.172a2 2 0 0 1-.586 1.414L14 14v7l-4-2v-5L3.586 7.586A2 2 0 0 1 3 6.172V4z"/></svg>
+        </div>
+        <span class="card-ttl">Bộ Lọc Thống Kê</span>
+      </div>
+
+      <!-- Nút hành động -->
+      <div style="display:flex;gap:8px;align-items:center">
+
+        <!-- Xuất Excel -->
+        <button class="btn-excel"
+          [disabled]="activeRows.length === 0 || isExporting"
+          (click)="exportExcel()"
+          title="Xuất Excel">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="8" y1="13" x2="16" y2="13"/>
+            <line x1="8" y1="17" x2="16" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          <ng-container *ngIf="isExporting">Đang xuất...</ng-container>
+          <ng-container *ngIf="!isExporting">Xuất Excel</ng-container>
+        </button>
+
+        <!-- In báo cáo -->
+        <button class="btn-print"
+            [disabled]="activeRows.length === 0"
+            (click)="printReport()">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          In báo cáo
+        </button>
+
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="filter-row">
+
+        <!-- Radio tabs -->
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="type" value="day" [(ngModel)]="viewType" (change)="loadRevenue()" />
+            <span class="radio-label">🕐 Theo giờ</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="type" value="month" [(ngModel)]="viewType" (change)="loadRevenue()" />
+            <span class="radio-label">📅 Theo ngày</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="type" value="year" [(ngModel)]="viewType" (change)="loadRevenue()" />
+            <span class="radio-label">📆 Theo tháng</span>
+          </label>
+        </div>
+
+        <!-- Chọn ngày (viewType = day) -->
+        <div class="field" *ngIf="viewType === 'day'">
+          <label>Chọn ngày</label>
+          <input type="date" [(ngModel)]="selectedDate" (change)="loadRevenue()" />
+        </div>
+
+        <!-- Chọn tháng (viewType = month) -->
+        <div class="field" *ngIf="viewType === 'month'">
+          <label>Chọn tháng</label>
+          <input type="month" [(ngModel)]="selectedMonth" (change)="loadRevenue()" />
+        </div>
+
+        <!-- Chọn năm (viewType = year) -->
+        <div class="field" *ngIf="viewType === 'year'">
+          <label>Chọn năm</label>
+          <select [(ngModel)]="selectedYear" (change)="loadRevenue()">
+            <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART CARD -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-left">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 20h16M4 20V10l4-4 4 4 4-8v18M8 6v14M12 10v10M16 4v16"/></svg>
+        </div>
+        <span class="card-ttl">Biểu Đồ Doanh Thu</span>
+      </div>
+
+      <!-- Tổng hiện ở góc phải header chart -->
+      <div *ngIf="chartData.length > 0" style="text-align:right;line-height:1.5">
+        <div style="font-size:13px;font-weight:700;color:var(--accent,#d70018)">
+          {{ totalRevenue | number:'1.0-0' }}₫
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600">
+          Tổng doanh thu · {{ totalOrders | number:'1.0-0' }} đơn
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="chart-wrapper" *ngIf="chartData.length > 0">
+        <canvas #revenueChart></canvas>
+      </div>
+      <div class="chart-empty" *ngIf="chartData.length === 0">
+        <span>📊</span>
+        <p>Chưa có dữ liệu — hãy chọn bộ lọc bên trên</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE CARD: chỉ hiển thị slot có doanh thu -->
+  <div class="card" *ngIf="activeRows.length > 0">
+    <div class="card-hdr">
+      <div class="card-hdr-left">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        </div>
+        <span class="card-ttl">Chi Tiết Doanh Thu</span>
+      </div>
+      <!-- Tổng ở header bảng -->
+      <div style="text-align:right;line-height:1.5">
+        <span style="font-size:13px;font-weight:700;color:var(--accent,#d70018)">
+          {{ totalRevenue | number:'1.0-0' }}₫
+        </span>
+        <span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:8px">
+          {{ totalOrders | number:'1.0-0' }} đơn
+        </span>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>
+              <ng-container [ngSwitch]="viewType">
+                <ng-container *ngSwitchCase="'day'">Giờ</ng-container>
+                <ng-container *ngSwitchCase="'month'">Ngày</ng-container>
+                <ng-container *ngSwitchDefault>Tháng</ng-container>
+              </ng-container>
+            </th>
+            <th>Số đơn</th>
+            <th>Tỷ lệ</th>
+            <th>Doanh thu</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of activeRows; let i = index">
+            <td style="color:var(--muted);font-size:12px">{{ i + 1 }}</td>
+            <td><span class="period-badge">{{ row.label }}</span></td>
+            <td style="font-size:12px;font-weight:600">{{ row.orders | number:'1.0-0' }}</td>
+            <td>
+              <div class="bar-wrap">
+                <div class="bar-bg">
+                  <div class="bar-fill" [style.width.%]="(row.value / maxRevenue) * 100"></div>
+                </div>
+                <span style="font-size:11px;color:var(--muted);font-weight:700">
+                  {{ ((row.value / totalRevenue) * 100).toFixed(1) }}%
+                </span>
+              </div>
+            </td>
+            <td style="font-weight:700">{{ row.value | number:'1.0-0' }}₫</td>
+          </tr>
+        </tbody>
+        <!-- Dòng tổng cuối bảng -->
+        <tfoot>
+          <tr style="border-top: 2px solid var(--border, #e2e8f0);">
+            <td colspan="2" style="font-weight:700;font-size:13px;padding:8px 10px">
+              Tổng cộng
+            </td>
+            <td style="font-weight:700;font-size:13px;padding:8px 10px">
+              {{ totalOrders | number:'1.0-0' }}
+            </td>
+            <td></td>
+            <td style="font-weight:700;font-size:14px;padding:8px 10px;color:var(--accent,#d70018)">
+              {{ totalRevenue | number:'1.0-0' }}₫
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+<div class="toast-container">
+  <div class="toast" [class.toast-show]="toastVisible" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+    <span class="toast-icon">{{ toastType === 'success' ? '✓' : '✕' }}</span>
+    <span class="toast-msg">{{ toastMessage }}</span>
+  </div>
+</div>
+</div>

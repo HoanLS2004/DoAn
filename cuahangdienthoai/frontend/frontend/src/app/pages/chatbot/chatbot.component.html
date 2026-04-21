@@ -1,0 +1,90 @@
+<!-- chatbot.component.html -->
+
+<!-- ── FAB TOGGLE ── -->
+<button class="chat-toggle" (click)="toggle()" [title]="open ? 'Đóng' : 'Chat với AI'">
+  <svg *ngIf="!open" viewBox="0 0 24 24">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+  </svg>
+  <svg *ngIf="open" viewBox="0 0 24 24">
+    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+  </svg>
+  <span class="online-dot"></span>
+</button>
+
+<!-- ── CHAT WINDOW ── -->
+<div class="chat-window" [class.open]="open">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="hdr-av">🤖</div>
+    <div class="hdr-info">
+      <div class="hdr-name">AI Tư vấn điện thoại</div>
+      <div class="hdr-status">
+        <span class="status-dot"></span> Đang trực tuyến
+      </div>
+    </div>
+    <button class="hdr-close" (click)="toggle()">✕</button>
+  </div>
+
+  <!-- Quick questions (3 cố định) -->
+  <div class="quick-bar">
+    <button class="qq" (click)="sendQuick('🚚 Phí ship vận chuyển')">
+      🚚 Vận chuyển
+    </button>
+    <button class="qq" (click)="sendQuick('Tôi muốn hủy đơn hàng của mình')">
+      ❌ Hủy đơn hàng
+    </button>
+    <button class="qq" (click)="sendQuick('Chính sách bảo hành và đổi trả')">
+      📜 Chính sách bảo hành và đổi trả
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="chat-body" id="chat-body">
+
+    <!-- Lời chào mặc định -->
+    <div class="row" *ngIf="messages.length === 0">
+      <div class="av">🤖</div>
+      <div class="bub bot">
+        Xin chào! 👋 Tôi là <strong>AI tư vấn</strong> của Tuan Anh Mobile.<br/>
+        Bạn cần hỗ trợ gì hôm nay?
+      </div>
+    </div>
+
+    <ng-container *ngFor="let m of messages">
+      <!-- User -->
+      <div class="row u" *ngIf="m.role === 'user'">
+        <div class="bub user">{{ m.text }}</div>
+      </div>
+      <!-- Bot — render HTML (links in bold) -->
+      <div class="row" *ngIf="m.role === 'bot'">
+        <div class="av">🤖</div>
+        <div class="bub bot" [innerHTML]="renderText(m.text)"></div>
+      </div>
+    </ng-container>
+
+    <!-- Typing indicator -->
+    <div class="typing-row" *ngIf="typing">
+      <div class="av">🤖</div>
+      <div class="typing-bub">
+        <div class="td"></div><div class="td"></div><div class="td"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Input -->
+  <div class="chat-input">
+    <input
+      type="text"
+      [(ngModel)]="message"
+      (keyup.enter)="send()"
+      placeholder="Nhập câu hỏi của bạn..."
+      [disabled]="typing"
+    />
+    <button class="btn-send" (click)="send()" [disabled]="typing">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+</div>

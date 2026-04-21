@@ -1,0 +1,314 @@
+<!-- shoppingcart.component.html -->
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <a class="tb-logo" routerLink="/">
+    <div class="tb-logo-box"><img src="assets/logo.jpg" alt="logo"/></div>
+    <div>
+      <div class="tb-logo-name">TUAN ANH MOBILE</div>
+      <div class="tb-logo-sub">Điện thoại chính hãng</div>
+    </div>
+  </a>
+  <a class="tb-back" routerLink="/">🛍️ Tiếp tục mua sắm</a>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast"
+  [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  {{ toast.message }}
+</div>
+
+<!-- ════════════════════════════════════════════
+     POPUP 0 — LỖI CẬP NHẬT SỐ LƯỢNG
+════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="errPopup.show" (click)="closeErrPopup()">
+  <div class="popup-box" (click)="$event.stopPropagation()">
+
+    <div class="pop-head danger">
+      <div class="pop-head-ico">⚠️</div>
+      <div>
+        <div class="pop-head-ttl">{{ errPopup.title }}</div>
+        <div class="pop-head-sub">Có lỗi xảy ra khi cập nhật</div>
+      </div>
+    </div>
+
+    <div class="pop-body">
+      <p class="pop-msg">{{ errPopup.message }}</p>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-danger" (click)="closeErrPopup()">Đã hiểu</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     POPUP 1 — XÓA SẢN PHẨM
+════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" (click)="$event.stopPropagation()">
+
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div>
+        <div class="pop-head-ttl">Xoá khỏi giỏ hàng</div>
+        <div class="pop-head-sub">Thao tác này không thể hoàn tác</div>
+      </div>
+    </div>
+
+    <div class="pop-body" *ngIf="delPopup.item">
+      <div class="pop-product">
+        <img class="pop-product-img"
+          [src]="'http://localhost:5201' + delPopup.item.thumbnail"
+          [alt]="delPopup.item.productName"
+          (error)="onImgErr($event)"/>
+        <div>
+          <div class="pop-product-name">{{ delPopup.item.productName }}</div>
+          <div class="pop-product-price">
+            {{ delPopup.item.price * (1 - delPopup.item.discount/100) | number:'1.0-0' }}₫
+          </div>
+        </div>
+      </div>
+      <p class="pop-msg">Bạn có chắc muốn xoá sản phẩm này khỏi giỏ?</p>
+    </div>
+
+    <div class="pop-body" *ngIf="!delPopup.item">
+      <p class="pop-msg">Xoá {{ getSelectedCount() }} sản phẩm đã chọn khỏi giỏ hàng?</p>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost"  (click)="closeDelPopup()">Giữ lại</button>
+      <button class="pbtn pbtn-danger" (click)="confirmDelete()">🗑️ Xoá ngay</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     POPUP 2 — XÁC NHẬN THANH TOÁN
+════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="checkPopup" (click)="checkPopup = false">
+  <div class="popup-box" (click)="$event.stopPropagation()">
+
+    <div class="pop-head success">
+      <div class="pop-head-ico">✅</div>
+      <div>
+        <div class="pop-head-ttl">Xác nhận đặt hàng</div>
+        <div class="pop-head-sub">{{ getSelectedCount() }} sản phẩm được chọn</div>
+      </div>
+    </div>
+
+    <div class="pop-body">
+      <!-- order item list -->
+      <div class="pop-order-list">
+        <div class="pop-order-item" *ngFor="let item of selectedItems()">
+          <img class="pop-order-img"
+            [src]="'http://localhost:5201' + item.thumbnail"
+            [alt]="item.productName"
+            (error)="onImgErr($event)"/>
+          <span class="pop-order-name">{{ item.productName }}</span>
+          <span class="pop-order-price">
+            ×{{ item.quantity }}<br/>
+            {{ item.quantity * item.price * (1-item.discount/100) | number:'1.0-0' }}₫
+          </span>
+        </div>
+      </div>
+
+      <!-- total -->
+      <div class="pop-total-row">
+        <span class="pop-total-lbl">Tổng thanh toán</span>
+        <span class="pop-total-val">{{ getSelectedTotal() | number:'1.0-0' }}₫</span>
+      </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="checkPopup = false">Quay lại</button>
+      <button class="pbtn pbtn-ok"    (click)="confirmCheckout()">⚡ Đặt hàng ngay</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE
+════════════════════════════════════════════ -->
+<div class="cart-wrap">
+
+  <div class="page-hdr">
+    <div class="page-title">🛒 Giỏ hàng của bạn</div>
+    <div class="page-cnt">{{ shoppingCart.length }} sản phẩm</div>
+  </div>
+
+  <!-- EMPTY -->
+  <div class="cart-empty" *ngIf="shoppingCart.length === 0">
+    <div class="empty-ico">🛒</div>
+    <div class="empty-txt">Giỏ hàng đang trống</div>
+    <p class="empty-sub">Hãy thêm sản phẩm yêu thích vào giỏ nhé!</p>
+    <a class="btn-shop" routerLink="/">🔍 Khám phá sản phẩm</a>
+  </div>
+
+  <ng-container *ngIf="shoppingCart.length > 0">
+
+    <!-- SELECT ALL BAR -->
+    <div class="select-bar">
+      <label>
+        <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleAll()"/>
+        Chọn tất cả ({{ shoppingCart.length }} sản phẩm)
+      </label>
+      <button class="del-selected"
+        *ngIf="getSelectedCount() > 0"
+        (click)="openDelPopup(null)">
+        🗑️ Xoá đã chọn ({{ getSelectedCount() }})
+      </button>
+    </div>
+
+    <!-- 2-COLUMN LAYOUT -->
+    <div class="cart-layout">
+
+      <!-- PRODUCT GRID -->
+      <div class="cart-grid">
+        <div class="cart-card"
+          *ngFor="let item of shoppingCart"
+          [class.selected]="item.selected"
+          [class.over-stock]="isOverStock(item)">
+
+          <input class="card-check"
+            type="checkbox"
+            [(ngModel)]="item.selected"
+            (change)="updateSelection()"/>
+
+          <!-- image -->
+          <div class="card-img-wrap">
+            <img class="card-img"
+              [src]="'http://localhost:5201' + item.thumbnail"
+              [alt]="item.productName"
+              (error)="onImgErr($event)"/>
+            <div class="card-disc" *ngIf="item.discount > 0">-{{ item.discount }}%</div>
+          </div>
+
+          <!-- body -->
+          <div class="card-body">
+            <div class="card-name">{{ item.productName }}</div>
+
+            <div class="card-prices">
+              <span class="price-sale">{{ item.price * (1-item.discount/100) | number:'1.0-0' }}₫</span>
+              <span class="price-orig" *ngIf="item.discount > 0">{{ item.price | number:'1.0-0' }}₫</span>
+            </div>
+
+            <div class="card-sub">Thành tiền: <strong>{{ item.quantity * item.price * (1-item.discount/100) | number:'1.0-0' }}₫</strong></div>
+
+            <!-- ── CẢNH BÁO TỒN KHO ── -->
+            <div class="stock-warning" *ngIf="isOverStock(item)">
+              ⚠️ Chỉ còn {{ item.stockQuantity }} sản phẩm trong kho
+            </div>
+
+            <div class="card-actions">
+              <div class="qty">
+                <button class="qty-btn" (click)="decrease(item)">−</button>
+                <span class="qty-num" [class.qty-over]="isOverStock(item)">{{ item.quantity }}</span>
+                <!-- Disable nút + khi đã đạt giới hạn tồn kho -->
+                <button class="qty-btn"
+                  (click)="increase(item)"
+                  [disabled]="item.quantity >= item.stockQuantity">+</button>
+              </div>
+              <button class="del-btn" (click)="openDelPopup(item)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+                </svg>
+                Xoá
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div><!-- /cart-grid -->
+
+      <!-- SUMMARY PANEL (desktop) -->
+      <div class="summary-panel">
+        <div class="sum-hdr">🧾 Tóm tắt đơn hàng</div>
+        <div class="sum-body">
+
+          <div class="sum-row">
+            <span class="sum-lbl">Đã chọn</span>
+            <span class="sum-val">{{ getSelectedCount() }} / {{ shoppingCart.length }} sp</span>
+          </div>
+          <div class="sum-row">
+            <span class="sum-lbl">Tạm tính</span>
+            <span class="sum-val">{{ getOriginalTotal() | number:'1.0-0' }}₫</span>
+          </div>
+          <div class="sum-row">
+            <span class="sum-lbl">Giảm giá</span>
+            <span class="sum-val" style="color:#00864a">-{{ getSavings() | number:'1.0-0' }}₫</span>
+          </div>
+          <div class="sum-row">
+            <span class="sum-lbl">Vận chuyển</span>
+            <span class="sum-val" style="color:#00864a">Miễn phí 🎉</span>
+          </div>
+
+          <hr class="sum-divider"/>
+
+          <div class="sum-total-row">
+            <span class="sum-total-lbl">Tổng thanh toán</span>
+            <span class="sum-total-val">{{ getSelectedTotal() | number:'1.0-0' }}₫</span>
+          </div>
+
+          <div class="sum-save" *ngIf="getSavings() > 0">
+            🎉 Tiết kiệm {{ getSavings() | number:'1.0-0' }}₫
+          </div>
+
+          <!-- Nút thanh toán — đổi text khi có sản phẩm vượt tồn kho -->
+          <button class="btn-checkout"
+            [disabled]="getSelectedCount() === 0 || hasOverStockItem()"
+            [class.btn-out-of-stock]="hasOverStockItem() && getSelectedCount() > 0"
+            (click)="openCheckoutPopup()">
+            <ng-container *ngIf="hasOverStockItem() && getSelectedCount() > 0; else normalCheckout">
+              ⚠️ Sản phẩm không đủ số lượng
+            </ng-container>
+            <ng-template #normalCheckout>⚡ Tiến hành thanh toán</ng-template>
+          </button>
+
+          <div class="guarantee-list">
+            <div class="g-item">✅ Hàng chính hãng 100%</div>
+            <div class="g-item">🚀 Giao hàng nhanh 2h</div>
+            <div class="g-item">🔄 Đổi trả trong 30 ngày</div>
+            <div class="g-item">🛡️ Bảo hành 12 tháng</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /cart-layout -->
+
+  </ng-container>
+
+</div><!-- /cart-wrap -->
+
+<!-- ── STICKY FOOTER (mobile + tablet) ── -->
+<div class="cart-footer" *ngIf="shoppingCart.length > 0">
+  <div class="foot-left">
+    <label>
+      <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleAll()"/>
+      Chọn tất cả
+    </label>
+  </div>
+  <div class="foot-right">
+    <div>
+      <div class="foot-total-lbl">Tổng ({{ getSelectedCount() }} sp):</div>
+      <div class="foot-total-val">{{ getSelectedTotal() | number:'1.0-0' }}₫</div>
+    </div>
+    <!-- Nút mobile — đổi text khi có sản phẩm vượt tồn kho -->
+    <button class="foot-checkout"
+      [disabled]="getSelectedCount() === 0 || hasOverStockItem()"
+      [class.btn-out-of-stock]="hasOverStockItem() && getSelectedCount() > 0"
+      (click)="openCheckoutPopup()">
+      <ng-container *ngIf="hasOverStockItem() && getSelectedCount() > 0; else normalFooter">
+        ⚠️ Không đủ hàng
+      </ng-container>
+      <ng-template #normalFooter>⚡ Mua hàng</ng-template>
+    </button>
+  </div>
+</div>

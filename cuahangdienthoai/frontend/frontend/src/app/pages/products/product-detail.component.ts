@@ -1,0 +1,109 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
+@Component({
+  selector: 'app-product-detail',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+  <div class="container" *ngIf="product">
+
+    <div class="left">
+      <img [src]="'http://localhost:5201' + product.imageUrl" class="main-img"/>
+
+      <div class="thumbs">
+        <img *ngFor="let img of images"
+             [src]="'http://localhost:5201' + img.imageUrl"
+             (click)="product.imageUrl = img.imageUrl">
+      </div>
+    </div>
+
+    <div class="right">
+      <h2>{{ product.name }}</h2>
+
+      <p class="price">{{ product.price | number }} đ</p>
+
+      <p>{{ product.description }}</p>
+
+      <button (click)="addToCart()">🛒 Thêm giỏ hàng</button>
+    </div>
+
+  </div>
+  `,
+  styles: [`
+    .container {
+      display: flex;
+      gap: 30px;
+      padding: 20px;
+    }
+    .left { width: 50%; }
+    .right { width: 50%; }
+
+    .main-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+
+    .thumbs img {
+      width: 60px;
+      margin: 5px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+    }
+
+    .price {
+      color: red;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 10px;
+      margin-top: 10px;
+    }
+  `]
+})
+export class ProductDetailComponent implements OnInit {
+
+  product: any;
+  images: any[] = [];
+  id!: number;
+
+  constructor(private route: ActivatedRoute, private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.id = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.loadProduct();
+    this.loadImages();
+  }
+
+  loadProduct() {
+    this.http.get(`http://localhost:5201/api/products/${this.id}`)
+      .subscribe(res => this.product = res);
+  }
+
+  loadImages() {
+    this.http.get<any[]>(`http://localhost:5201/api/ProductImages?productId=${this.id}`)
+      .subscribe(res => this.images = res);
+  }
+
+  addToCart() {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    const index = cart.findIndex((x: any) => x.productID === this.product.productID);
+
+    if (index > -1) {
+      cart[index].quantity += 1;
+    } else {
+      cart.push({ ...this.product, quantity: 1 });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    alert('✅ Đã thêm vào giỏ hàng');
+  }
+}

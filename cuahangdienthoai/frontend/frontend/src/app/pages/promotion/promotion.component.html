@@ -1,0 +1,324 @@
+<!-- promotion.component.html -->
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-brand-icon">🏷️</div>
+    <div>
+      <div class="topbar-brand-name">Tuan Anh Mobile</div>
+    </div>
+  </div>
+  <div class="topbar-nav">
+    <span class="topbar-nav-item active">Khuyến mãi</span>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    <span>Admin</span>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast"
+  [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  {{ toast.message }}
+</div>
+
+<!-- ══ POPUP THÊM / SỬA ══ -->
+<div class="popup-overlay" [class.show]="formPopup.show" (click)="closeFormPopup()">
+  <div class="popup-box popup-xl" (click)="$event.stopPropagation()">
+
+    <div class="pop-head" [ngClass]="isEdit ? 'edit-h' : 'create-h'">
+      <div class="pop-head-ico">{{ isEdit ? '✏️' : '➕' }}</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">{{ isEdit ? 'Cập nhật mã khuyến mãi' : 'Thêm mã khuyến mãi mới' }}</div>
+        <div class="pop-head-sub">{{ isEdit ? 'Chỉnh sửa mã: ' + form.code : 'Nhập thông tin mã giảm giá' }}</div>
+      </div>
+      <button class="pop-close" (click)="closeFormPopup()">✕</button>
+    </div>
+
+    <div class="pop-scroll">
+
+      <!-- Thông tin mã -->
+      <div class="form-section">
+        <div class="form-section-title">🏷️ Thông tin mã</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>Mã khuyến mãi <span class="req">*</span></label>
+            <input [(ngModel)]="form.code" placeholder="VD: GIAM20, SALE50..." />
+          </div>
+          <div class="form-field">
+            <label>Loại giảm giá</label>
+            <select [(ngModel)]="form.discountType">
+              <option value="Percent">% Phần trăm</option>
+              <option value="Amount">₫ Số tiền cố định</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Giá trị giảm</label>
+            <input type="number" [(ngModel)]="form.discountValue" placeholder="0" />
+          </div>
+          <div class="form-field">
+            <label>Đơn tối thiểu (₫)</label>
+            <input type="number" [(ngModel)]="form.minOrderValue" placeholder="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Thời gian & Số lượng -->
+      <div class="form-section">
+        <div class="form-section-title">📅 Thời gian & Số lượng</div>
+        <div class="form-grid-3">
+          <div class="form-field">
+            <label>Ngày bắt đầu</label>
+            <input type="date" [(ngModel)]="form.startDate" />
+          </div>
+          <div class="form-field">
+            <label>Ngày kết thúc</label>
+            <input type="date" [(ngModel)]="form.endDate" />
+          </div>
+          <div class="form-field">
+            <label>Số lượt dùng</label>
+            <input type="number" [(ngModel)]="form.quantity" placeholder="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Trạng thái -->
+      <div class="form-section">
+        <div class="form-section-title">⚙️ Trạng thái</div>
+        <div class="form-field">
+          <label>Hiển thị mã</label>
+          <select [(ngModel)]="form.isActive">
+            <option [ngValue]="true">✅ Kích hoạt</option>
+            <option [ngValue]="false">🚫 Ẩn</option>
+          </select>
+        </div>
+      </div>
+
+    </div><!-- /pop-scroll -->
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeFormPopup()">Hủy</button>
+      <button class="pbtn" [ngClass]="isEdit ? 'pbtn-blue' : 'pbtn-green'"
+        (click)="savePromotion()" [disabled]="formPopup.loading">
+        <span class="spinner" *ngIf="formPopup.loading"></span>
+        {{ isEdit ? '💾 Lưu cập nhật' : '➕ Thêm mới' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP XÓA ══ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" style="max-width:420px" (click)="$event.stopPropagation()">
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Xóa mã khuyến mãi</div>
+        <div class="pop-head-sub">Không thể hoàn tác hành động này</div>
+      </div>
+      <button class="pop-close" (click)="closeDelPopup()">✕</button>
+    </div>
+    <div class="pop-body">
+      <div class="del-preview">
+        <div class="del-ico">🏷️</div>
+        <div>
+          <div class="del-id">{{ delPopup.code }}</div>
+          <div class="del-sub">{{ delPopup.discountValue | number:'1.0-0' }}{{ delPopup.discountType === 'Percent' ? '%' : '₫' }} giảm</div>
+        </div>
+      </div>
+      <div class="del-warn">⚠️ Mã khuyến mãi sẽ bị xóa vĩnh viễn khỏi hệ thống.</div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeDelPopup()">Hủy</button>
+      <button class="pbtn pbtn-red" (click)="confirmDelete()" [disabled]="delPopup.loading">
+        <span class="spinner" *ngIf="delPopup.loading"></span>
+        🗑️ Xóa ngay
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE ══ -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">🏷️ Quản Lý Khuyến Mãi</div>
+      <div class="page-sub">Tạo và quản lý mã giảm giá, voucher cho khách hàng</div>
+    </div>
+    <button class="btn-add" (click)="openAddPopup()">
+      <span>➕</span> Thêm mã KM
+    </button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#eff6ff">🏷️</div>
+      <div>
+        <div class="stat-val">{{ promotions.length }}</div>
+        <div class="stat-lbl">Tổng mã KM</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#edfaf3">✅</div>
+      <div>
+        <div class="stat-val">{{ countByStatus(true) }}</div>
+        <div class="stat-lbl">Đang hoạt động</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#fff0f1">🚫</div>
+      <div>
+        <div class="stat-val">{{ countByStatus(false) }}</div>
+        <div class="stat-lbl">Đã ẩn</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#fff7ed">%</div>
+      <div>
+        <div class="stat-val">{{ countByType('Percent') }}</div>
+        <div class="stat-lbl">Giảm theo %</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-title-dot"></span>
+        Danh Sách Mã Khuyến Mãi
+      </div>
+      <span class="badge-count">{{ filteredPromos.length }} mã</span>
+    </div>
+<!-- Search bar -->
+    <div class="card" style="margin-bottom:0;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0">
+      <div class="card-body" style="padding:14px 20px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+
+          <!-- Text search -->
+          <div style="position:relative;flex:1;min-width:0">
+            <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.45;font-size:14px;pointer-events:none">🔍</span>
+            <input
+              style="width:100%;box-sizing:border-box;padding:9px 36px 9px 34px;border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:13px;color:var(--text);outline:none;background:#fafbfd;transition:.2s"
+              [(ngModel)]="searchText"
+              (keyup.enter)="onSearch()"
+              placeholder="Tìm theo mã code, mô tả..."/>
+            <button *ngIf="searchText"
+              style="position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted)"
+              (click)="clearSearch()">✕</button>
+          </div>
+
+          <!-- Filter loại -->
+          <select
+            style="padding:9px 30px 9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:13px;color:var(--text);background:#fafbfd;outline:none;appearance:none;cursor:pointer;flex-shrink:0"
+            [(ngModel)]="filterType" (change)="onSearch()">
+            <option value="">Tất cả loại</option>
+            <option value="Percent">% Phần trăm</option>
+            <option value="Amount">₫ Cố định</option>
+          </select>
+
+          <!-- Filter trạng thái -->
+          <select
+            style="padding:9px 30px 9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:13px;color:var(--text);background:#fafbfd;outline:none;appearance:none;cursor:pointer;flex-shrink:0"
+            [(ngModel)]="filterStatus" (change)="onSearch()">
+            <option value="">Tất cả trạng thái</option>
+            <option value="true">✅ Đang dùng</option>
+            <option value="false">🚫 Đã ẩn</option>
+          </select>
+
+          <!-- Nút tìm -->
+          <button class="btn-add" style="padding:9px 18px;font-size:12px;flex-shrink:0" (click)="onSearch()">
+            🔍 Tìm kiếm
+          </button>
+
+        </div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Mã code</th>
+            <th>Loại</th>
+            <th>Giá trị</th>
+            <th>Đơn tối thiểu</th>
+            <th>Thời gian</th>
+            <th>Lượt dùng</th>
+            <th>Trạng thái</th>
+            <th style="text-align:center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="pagedPromotions.length > 0; else emptyTpl">
+            <tr *ngFor="let p of pagedPromotions">
+              <td><span class="cell-code">{{ p.code }}</span></td>
+              <td>
+                <span class="badge-type" [ngClass]="p.discountType === 'Percent' ? 'type-percent' : 'type-amount'">
+                  {{ p.discountType === 'Percent' ? '% Phần trăm' : '₫ Cố định' }}
+                </span>
+              </td>
+              <td>
+                <span class="cell-val">
+                  {{ p.discountValue | number:'1.0-0' }}{{ p.discountType === 'Percent' ? '%' : '₫' }}
+                </span>
+              </td>
+              <td><span style="color:var(--muted);font-size:12px">{{ p.minOrderValue | number:'1.0-0' }}₫</span></td>
+              <td>
+                <span class="cell-date">
+                  {{ p.startDate | date:'dd/MM/yy' }} → {{ p.endDate | date:'dd/MM/yy' }}
+                </span>
+              </td>
+              <td><span style="font-weight:800">{{ p.quantity }}</span></td>
+              <td>
+                <span class="badge-status" [ngClass]="p.isActive ? 'status-active' : 'status-hidden'">
+                  {{ p.isActive ? '✅ Đang dùng' : '🚫 Ẩn' }}
+                </span>
+              </td>
+              <td>
+                <div class="cell-actions">
+                  <button class="btn-icon-edit" (click)="openEditPopup(p)" title="Chỉnh sửa">✏️</button>
+                  <button class="btn-icon-del"  (click)="openDelPopup(p)"  title="Xóa">🗑</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #emptyTpl>
+            <tr><td colspan="8">
+              <div class="empty-state">
+                <div class="empty-ico">🏷️</div>
+                <p>Chưa có mã khuyến mãi nào</p>
+                <button class="btn-add" (click)="openAddPopup()">➕ Thêm mã đầu tiên</button>
+              </div>
+            </td></tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="promotions.length > 0">
+      <div class="pag-info">Trang {{ currentPage }}/{{ totalPages }} · {{ filteredPromos.length }} mã</div>
+      <div class="pag-btns">
+        <button class="pag-btn" (click)="goPage(1)"             [disabled]="currentPage===1">«</button>
+        <button class="pag-btn" (click)="goPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+        <ng-container *ngFor="let p of pageNumbers()">
+          <span class="pag-ellipsis" *ngIf="p===-1">…</span>
+          <button class="pag-btn" *ngIf="p!==-1"
+            [class.active]="p===currentPage" (click)="goPage(p)">{{ p }}</button>
+        </ng-container>
+        <button class="pag-btn" (click)="goPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
+        <button class="pag-btn" (click)="goPage(totalPages)"    [disabled]="currentPage===totalPages">»</button>
+      </div>
+    </div>
+
+    <div class="tbl-footer">
+      <span>Hiển thị {{ pagedPromotions.length }}/{{ filteredPromos.length }} mã</span>
+      <span>Tuan Anh Mobile · Promotion Manager v2.0</span>
+    </div>
+  </div>
+
+</div><!-- /page -->  

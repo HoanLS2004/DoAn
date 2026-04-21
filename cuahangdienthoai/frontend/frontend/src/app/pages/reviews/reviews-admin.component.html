@@ -1,0 +1,350 @@
+<!-- reviews-admin.component.html -->
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-brand-box">
+      <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 .59 1.42l9 9A2 2 0 0 0 13 22a2 2 0 0 0 1.41-.59l7-7A2 2 0 0 0 22 13a2 2 0 0 0-.59-1.42zM5.5 7A1.5 1.5 0 1 1 7 5.5 1.5 1.5 0 0 1 5.5 7z"/></svg>
+    </div>
+    Tuan Anh Mobile
+  </div>
+  <div class="topnav">
+    <div class="topnav-item active">⭐ Đánh giá</div>
+  </div>
+  <div class="tb-user"><div class="tb-avatar">👤</div> Admin</div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  {{ toast.message }}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     POPUP 0 — THÊM ĐÁNH GIÁ MỚI
+══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="addPopup.show" (click)="closeAddPopup()">
+  <div class="popup-box" style="max-width:480px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head add-h">
+      <div class="pop-head-ico">➕</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Thêm Đánh Giá Mới</div>
+        <div class="pop-head-sub">Nhập thông tin đánh giá bên dưới</div>
+      </div>
+      <button class="pop-close" (click)="closeAddPopup()">✕</button>
+    </div>
+
+    <div class="pop-body">
+      <div class="pop-form-row">
+        <div class="pop-form-field">
+          <label>User ID *</label>
+          <input type="number" [(ngModel)]="addPopup.form.userID" placeholder="Nhập ID User"/>
+        </div>
+        <div class="pop-form-field">
+          <label>Product ID *</label>
+          <input type="number" [(ngModel)]="addPopup.form.productID" placeholder="Nhập ID Product"/>
+        </div>
+      </div>
+
+      <div class="pop-form-field">
+        <label>Số sao đánh giá</label>
+        <div class="star-selector">
+          <span *ngFor="let s of [1,2,3,4,5]"
+            [class.lit]="s <= addPopup.form.rating"
+            (click)="addPopup.form.rating = s">★</span>
+          <span style="font-size:12px;font-weight:800;color:var(--muted);margin-left:6px">{{ addPopup.form.rating }}/5</span>
+        </div>
+      </div>
+
+      <div class="pop-form-field">
+        <label>Nội dung đánh giá *</label>
+        <textarea [(ngModel)]="addPopup.form.comment" placeholder="Nhập nội dung đánh giá..."></textarea>
+      </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeAddPopup()">Hủy</button>
+      <button class="pbtn pbtn-green" (click)="confirmAdd()" [disabled]="addPopup.loading">
+        <span class="spinner" *ngIf="addPopup.loading"></span>
+        ➕ Thêm đánh giá
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     POPUP 1 — XÓA ĐÁNH GIÁ
+══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" style="max-width:420px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Xóa đánh giá</div>
+        <div class="pop-head-sub">Hành động này không thể hoàn tác</div>
+      </div>
+      <button class="pop-close" (click)="closeDelPopup()">✕</button>
+    </div>
+
+    <div class="pop-body">
+      <div class="del-preview">
+        <div class="del-preview-ico">💬</div>
+        <div>
+          <div class="del-preview-id">#{{ delPopup.id }}</div>
+          <div class="del-preview-sub">
+            User #{{ delPopup.userID }} · SP #{{ delPopup.productID }} ·
+            <span *ngFor="let s of [1,2,3,4,5]">{{ s <= delPopup.rating ? '⭐' : '' }}</span>
+          </div>
+          <div class="del-preview-comment" *ngIf="delPopup.comment">
+            "{{ delPopup.comment | slice:0:80 }}{{ delPopup.comment.length > 80 ? '...' : '' }}"
+          </div>
+        </div>
+      </div>
+      <div class="del-warn">
+        <span>⚠️</span> Đánh giá này sẽ bị xóa vĩnh viễn khỏi hệ thống.
+      </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeDelPopup()">Hủy bỏ</button>
+      <button class="pbtn pbtn-red"   (click)="confirmDelete()" [disabled]="delPopup.loading">
+        <span class="spinner" *ngIf="delPopup.loading"></span>
+        🗑️ Xóa ngay
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     POPUP 2 — CHỈNH SỬA ĐÁNH GIÁ
+══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="editPopup.show" (click)="closeEditPopup()">
+  <div class="popup-box" style="max-width:480px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head edit-h">
+      <div class="pop-head-ico">✏️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Chỉnh sửa đánh giá</div>
+        <div class="pop-head-sub">Review #{{ editPopup.id }}</div>
+      </div>
+      <button class="pop-close" (click)="closeEditPopup()">✕</button>
+    </div>
+
+    <div class="pop-body">
+      <div class="pop-form-row">
+        <div class="pop-form-field">
+          <label>User ID</label>
+          <input type="number" [(ngModel)]="editPopup.form.userID" placeholder="User ID"/>
+        </div>
+        <div class="pop-form-field">
+          <label>Product ID</label>
+          <input type="number" [(ngModel)]="editPopup.form.productID" placeholder="SP ID"/>
+        </div>
+      </div>
+
+      <div class="pop-form-field">
+        <label>Số sao đánh giá</label>
+        <div class="star-selector">
+          <span *ngFor="let s of [1,2,3,4,5]"
+            [class.lit]="s <= editPopup.form.rating"
+            (click)="editPopup.form.rating = s">★</span>
+          <span style="font-size:12px;font-weight:800;color:var(--muted);margin-left:6px">{{ editPopup.form.rating }}/5</span>
+        </div>
+      </div>
+
+      <div class="pop-form-field">
+        <label>Nội dung đánh giá *</label>
+        <textarea [(ngModel)]="editPopup.form.comment" placeholder="Nhập nội dung..."></textarea>
+      </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeEditPopup()">Hủy</button>
+      <button class="pbtn pbtn-blue"  (click)="confirmEdit()" [disabled]="editPopup.loading">
+        <span class="spinner" *ngIf="editPopup.loading"></span>
+        💾 Lưu thay đổi
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     POPUP 3 — XEM CHI TIẾT ĐÁNH GIÁ
+══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="previewPopup.show" (click)="closePreviewPopup()">
+  <div class="popup-box" style="max-width:440px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head preview-h">
+      <div class="pop-head-ico">👁️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Chi tiết đánh giá</div>
+        <div class="pop-head-sub">Review #{{ previewPopup.review?.reviewID }}</div>
+      </div>
+      <button class="pop-close" (click)="closePreviewPopup()">✕</button>
+    </div>
+
+    <div class="pop-body" *ngIf="previewPopup.review">
+      <div class="preview-stars">
+        <span *ngFor="let s of [1,2,3,4,5]" class="preview-star" [class.on]="s <= previewPopup.review.rating" [class.off]="s > previewPopup.review.rating">★</span>
+        <span style="font-size:14px;font-weight:900;color:var(--muted);margin-left:8px">{{ previewPopup.review.rating }}/5</span>
+      </div>
+      <div class="preview-info">
+        <div class="preview-row">
+          <span class="preview-lbl">👤 User</span>
+          <span class="preview-val">#{{ previewPopup.review.userID }}</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-lbl">📦 Sản phẩm</span>
+          <span class="preview-val">#{{ previewPopup.review.productID }}</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-lbl">📅 Ngày</span>
+          <span class="preview-val">{{ previewPopup.review.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+      <div class="preview-comment">{{ previewPopup.review.comment }}</div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closePreviewPopup()">Đóng</button>
+      <button class="pbtn pbtn-blue"  (click)="openEditFromPreview()">✏️ Chỉnh sửa</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE
+══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">⭐ Quản Lý Đánh Giá</div>
+      <div class="page-sub">Xem và quản lý đánh giá sản phẩm từ khách hàng</div>
+    </div>
+    <!-- Nút mở popup thêm -->
+    <button class="btn btn-green" (click)="openAddPopup()">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Thêm đánh giá
+    </button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-icon si-blue">💬</div><div><div class="stat-val">{{ reviews.length }}</div><div class="stat-lbl">Tổng đánh giá</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-yellow">⭐</div><div><div class="stat-val">{{ avgRating() | number:'1.1-1' }}</div><div class="stat-lbl">Điểm trung bình</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-green">😊</div><div><div class="stat-val">{{ countByRating(5) + countByRating(4) }}</div><div class="stat-lbl">Tốt (4–5 ★)</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-red">😞</div><div><div class="stat-val">{{ countByRating(1) + countByRating(2) }}</div><div class="stat-lbl">Thấp (1–2 ★)</div></div></div>
+  </div>
+
+  <!-- Table card -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-left">
+        <div class="card-ico">
+          <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        </div>
+        <span class="card-ttl">Danh Sách Đánh Giá</span>
+      </div>
+
+      <!-- Search & filter -->
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5a6.5 6.5 0 1 0-6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" placeholder="Tìm theo bình luận, user, sản phẩm..."
+            [(ngModel)]="searchText" (input)="onSearch()"/>
+        </div>
+        <select class="filter-select"
+          [(ngModel)]="filterRating"
+          (change)="onSearch()">
+          <option [ngValue]="''">Tất cả sao</option>
+          <option [ngValue]="5">⭐⭐⭐⭐⭐ 5 sao</option>
+          <option [ngValue]="4">⭐⭐⭐⭐ 4 sao</option>
+          <option [ngValue]="3">⭐⭐⭐ 3 sao</option>
+          <option [ngValue]="2">⭐⭐ 2 sao</option>
+          <option [ngValue]="1">⭐ 1 sao</option>
+        </select>
+        <button class="btn-clear" (click)="clearSearch()" *ngIf="searchText || filterRating">✕ Xoá lọc</button>
+        <span class="search-count">{{ filteredReviews.length }} kết quả</span>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#ID</th>
+            <th>Người dùng</th>
+            <th>Sản phẩm</th>
+            <th>Đánh giá</th>
+            <th>Bình luận</th>
+            <th>Thời gian</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="pagedReviews.length > 0; else emptyTpl">
+            <tr *ngFor="let r of pagedReviews" (click)="openPreviewPopup(r)" style="cursor:pointer">
+              <td><span class="cell-id">#{{ r.reviewID }}</span></td>
+              <td>
+                <div class="cell-user">
+                  <div class="user-avatar" [style.background]="getAvatarColor(r.userID)">
+                    {{ getInitials(r.userID) }}
+                  </div>
+                  <span class="user-name">{{ getDisplayName(r) }}</span>
+                </div>
+              </td>
+              <td><span class="prod-badge">📦 #{{ r.productID }}</span></td>
+              <td>
+                <span class="rating-badge" [ngClass]="'r'+r.rating">
+                  <span *ngFor="let s of [1,2,3,4,5]" class="star-icon" [class.on]="s<=r.rating" [class.off]="s>r.rating">★</span>
+                  <span class="star-val">{{ r.rating }}/5</span>
+                </span>
+              </td>
+              <td class="cell-comment">
+                <div class="comment-text">{{ r.comment }}</div>
+              </td>
+              <td class="cell-date">
+                {{ r.createdAt | date:'dd/MM/yyyy' }}<br/>
+                <span style="font-size:11px">{{ r.createdAt | date:'HH:mm' }}</span>
+              </td>
+              <td>
+                <div class="act-wrap" (click)="$event.stopPropagation()">
+                  <button class="btn-edit-sm" (click)="openEditPopup(r)">✏️ Sửa</button>
+                  <button class="btn-del-sm"  (click)="openDelPopup(r)">🗑 Xóa</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #emptyTpl>
+            <tr><td colspan="7">
+              <div class="empty"><span>💬</span><p>Không có đánh giá nào phù hợp</p></div>
+            </td></tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="filteredReviews.length > 0">
+      <div class="pag-info">Trang {{ currentPage }}/{{ totalPages }} · {{ filteredReviews.length }} đánh giá</div>
+      <div class="pag-btns">
+        <button class="pag-btn" (click)="goPage(1)"             [disabled]="currentPage===1">«</button>
+        <button class="pag-btn" (click)="goPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+        <ng-container *ngFor="let p of pageNumbers()">
+          <span class="pag-ellipsis" *ngIf="p===-1">…</span>
+          <button class="pag-btn" *ngIf="p!==-1" [class.active]="p===currentPage" (click)="goPage(p)">{{ p }}</button>
+        </ng-container>
+        <button class="pag-btn" (click)="goPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
+        <button class="pag-btn" (click)="goPage(totalPages)"    [disabled]="currentPage===totalPages">»</button>
+      </div>
+    </div>
+
+  </div>
+</div>

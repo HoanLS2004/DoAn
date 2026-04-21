@@ -1,0 +1,259 @@
+<!-- product-images.component.html -->
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-box">
+      <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+    </div>
+    Tuan Anh Mobile
+  </div>
+  <div class="topnav">
+    <div class="topnav-item active">Hình ảnh</div>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    Admin
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast"
+  [ngClass]="{ show: toast.show, success: toast.type === 'success', error: toast.type === 'error' }">
+  {{ toast.message }}
+</div>
+
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title">Quản Lý Hình Ảnh Sản Phẩm</div>
+    <div class="page-sub">Upload, chỉnh sửa và quản lý hình ảnh theo sản phẩm</div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon si-red">🖼️</div>
+      <div>
+        <div class="stat-val">{{ images.length }}</div>
+        <div class="stat-lbl">Tổng hình ảnh</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-blue">⭐</div>
+      <div>
+        <div class="stat-val">{{ countThumbnails() }}</div>
+        <div class="stat-lbl">Thumbnail</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-green">📦</div>
+      <div>
+        <div class="stat-val">{{ countUniqueProducts() }}</div>
+        <div class="stat-lbl">Sản phẩm có ảnh</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2-COLUMN LAYOUT -->
+  <div class="layout-grid">
+
+    <!-- LEFT: UPLOAD / EDIT FORM -->
+    <div>
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-hdr-left">
+            <div class="card-icon" [class.blue]="isEditing">
+              <svg *ngIf="!isEditing" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+              <svg *ngIf="isEditing"  viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            </div>
+            <span class="card-ttl">{{ isEditing ? 'Chỉnh Sửa Hình Ảnh' : 'Upload Hình Ảnh Mới' }}</span>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <!-- Mode bar -->
+          <div class="mode-bar" [ngClass]="isEditing ? 'mode-edit' : 'mode-upload'">
+            <span *ngIf="!isEditing">📤 Chọn file và nhập thông tin để upload</span>
+            <span *ngIf="isEditing">✏️ Đang sửa ImageID #{{ editImageId }}</span>
+          </div>
+
+          <form [formGroup]="uploadForm" (ngSubmit)="saveImage()">
+
+            <!-- Product ID -->
+            <div class="field">
+              <label>Product ID *</label>
+              <input type="number" placeholder="Nhập mã sản phẩm" formControlName="productId" />
+            </div>
+
+            <!-- File upload zone -->
+            <div class="field">
+              <label>Chọn file ảnh</label>
+              <div class="upload-zone" [class.drag-over]="isDragOver"
+                (dragover)="$event.preventDefault(); isDragOver=true"
+                (dragleave)="isDragOver=false"
+                (drop)="onDrop($event)">
+                <input type="file" accept="image/*" (change)="onFileSelected($event)" formControlName="file" />
+                <div class="upload-zone-icon">📁</div>
+                <div class="upload-zone-text">
+                  {{ selectedFile ? selectedFile.name : 'Kéo thả hoặc click để chọn ảnh' }}
+                </div>
+                <div class="upload-zone-sub">JPG, PNG, WEBP – Tối đa 5MB</div>
+              </div>
+            </div>
+
+            <!-- Thumbnail toggle -->
+            <div class="toggle-row">
+              <input type="checkbox" id="isThumbnail" formControlName="isThumbnail" />
+              <label for="isThumbnail" class="toggle-label">⭐ Đặt làm Thumbnail</label>
+              <span class="toggle-desc">Ảnh đại diện sản phẩm</span>
+            </div>
+
+            <!-- Preview -->
+            <div class="preview-wrap" *ngIf="previews.length">
+              <div class="preview-item" *ngFor="let p of previews">
+                <img [src]="p" alt="Preview"/>
+                <div class="preview-label">
+                  {{ uploadForm.value.isThumbnail ? '⭐ Thumbnail' : 'Ảnh thường' }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress bar (upload mới) -->
+            <div class="progress-wrap" *ngIf="!isEditing && uploadProgress > 0 && uploadProgress < 100">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" [style.width.%]="uploadProgress"></div>
+              </div>
+              <div class="progress-text">{{ uploadProgress }}%</div>
+            </div>
+
+            <!-- Actions -->
+            <div class="btn-actions">
+              <button
+                type="submit"
+                class="btn"
+                [ngClass]="isEditing ? 'btn-blue' : 'btn-red'"
+              >
+                <svg *ngIf="!isEditing" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+                <svg *ngIf="isEditing"  viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4z"/></svg>
+                {{ isEditing ? 'Lưu cập nhật' : 'Upload' }}
+              </button>
+              <button type="button" class="btn btn-ghost" (click)="resetForm()">
+                <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                Hủy
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: IMAGE LIST -->
+    <div>
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-hdr-left">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+            </div>
+            <span class="card-ttl">Danh Sách Hình Ảnh</span>
+          </div>
+          <span class="badge-count">
+            {{ filteredImages_.length }} kết quả
+          </span>
+        </div>
+
+       
+        <div style="padding: 12px 20px; border-bottom: 1px solid var(--border); background: #fafbfd;">
+          <div class="search-row">
+            <div class="search-wrap">
+              <span class="search-ico">🔍</span>
+              <input class="search-input" type="text" [(ngModel)]="searchTerm"
+                   (ngModelChange)="onSearch()" placeholder="Lọc theo Product ID..." />
+              <button class="search-clear" *ngIf="searchTerm" (click)="clearSearch()">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Product</th>
+                <th>Ảnh</th>
+                <th>Thumbnail</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="pagedImages.length > 0; else emptyState">
+                <tr *ngFor="let img of pagedImages">
+                  <td><span class="cell-id">#{{ img.imageID }}</span></td>
+                  <td><span class="cell-pid">📦 {{ img.productID }}</span></td>
+                  <td>
+                    <img class="thumb-img"
+                      [src]="'http://localhost:5201' + img.imageUrl"
+                      [alt]="'Sản phẩm ' + img.productID"
+                    />
+                  </td>
+                  <td>
+                    <span class="badge-thumb" [ngClass]="img.isThumbnail ? 'badge-yes' : 'badge-no'">
+                      {{ img.isThumbnail ? '⭐ Thumbnail' : '— Thường' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="act-wrap">
+                      <button class="btn-edit"  (click)="editImage(img)">✏️ Sửa</button>
+                      <button class="btn-del"   (click)="deleteImage(img.imageID)">🗑 Xóa</button>
+                      <button class="btn-thumb" (click)="setThumbnail(img.imageID)"
+                        *ngIf="!img.isThumbnail">
+                        ⭐ Thumb
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+              <ng-template #emptyState>
+                <tr>
+                  <td colspan="5">
+                    <div class="empty">
+                      <span>🖼️</span>
+                      <p>Không tìm thấy hình ảnh nào</p>
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ── PAGINATION ── -->
+        <div class="pagination" *ngIf="filteredImages_.length > 0">
+          <div class="pag-info">
+            Trang {{ currentPage }}/{{ totalPages }} · {{ filteredImages_.length }} hình ảnh
+          </div>
+          <div class="pag-btns">
+            <button class="pag-btn" (click)="goPage(1)"             [disabled]="currentPage===1">«</button>
+            <button class="pag-btn" (click)="goPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+            <ng-container *ngFor="let p of pageNumbers()">
+              <span class="pag-ellipsis" *ngIf="p===-1">…</span>
+              <button class="pag-btn" *ngIf="p!==-1"
+                [class.active]="p===currentPage" (click)="goPage(p)">{{ p }}</button>
+            </ng-container>
+            <button class="pag-btn" (click)="goPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
+            <button class="pag-btn" (click)="goPage(totalPages)"    [disabled]="currentPage===totalPages">»</button>
+          </div>
+        </div>
+
+        <div class="tbl-footer">
+          <span>Hiển thị {{ pagedImages.length }}/{{ filteredImages_.length }} hình ảnh</span>
+          <span>Tuan Anh Mobile Image Manager v1.0</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end layout-grid -->
+</div>

@@ -1,0 +1,321 @@
+<!-- product.component.html -->
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-brand-icon">📦</div>
+    <div>
+      <div class="topbar-brand-name">Tuan Anh Mobile</div>
+    </div>
+  </div>
+  <div class="topbar-nav">
+    <span class="topbar-nav-item active">Sản phẩm</span>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    <span>Admin</span>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  <span class="toast-ico">{{ toast.type === 'success' ? '✅' : '❌' }}</span>
+  {{ toast.message }}
+</div>
+
+<!-- ══ POPUP THÊM / SỬA ══ -->
+<div class="popup-overlay" [class.show]="formPopup.show" (click)="closeFormPopup()">
+  <div class="popup-box popup-xl" (click)="$event.stopPropagation()">
+
+    <div class="pop-head" [ngClass]="isEdit ? 'edit-h' : 'create-h'">
+      <div class="pop-head-ico">{{ isEdit ? '✏️' : '➕' }}</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">{{ isEdit ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới' }}</div>
+        <div class="pop-head-sub">{{ isEdit ? 'Chỉnh sửa thông tin sản phẩm #' + editingProductId : 'Nhập thông tin sản phẩm mới' }}</div>
+      </div>
+      <button class="pop-close" (click)="closeFormPopup()">✕</button>
+    </div>
+
+    <div class="pop-scroll">
+      <form [formGroup]="form" (ngSubmit)="saveProduct()">
+
+        <!-- Thông tin cơ bản -->
+        <div class="form-section">
+          <div class="form-section-title">📋 Thông tin cơ bản</div>
+          <div class="form-grid-2">
+            <div class="form-field" style="grid-column: 1 / -1">
+              <label>Tên sản phẩm <span class="req">*</span></label>
+              <input formControlName="name" placeholder="Nhập tên sản phẩm"
+                [class.input-error]="form.controls['name'].invalid && form.controls['name'].touched" />
+              <span class="text-error" *ngIf="form.controls['name'].invalid && form.controls['name'].touched">
+                Tên sản phẩm không được để trống
+              </span>
+            </div>
+            <div class="form-field">
+              <label>Thương hiệu <span class="req">*</span></label>
+              <select formControlName="brandID"
+                [class.input-error]="form.controls['brandID'].invalid && form.controls['brandID'].touched">
+                <option value="">Chọn thương hiệu</option>
+                <option *ngFor="let b of brands" [ngValue]="b.brandID">{{ b.brandName }}</option>
+              </select>
+              <span class="text-error" *ngIf="form.controls['brandID'].invalid && form.controls['brandID'].touched">
+                Bạn phải chọn thương hiệu
+              </span>
+            </div>
+            <div class="form-field">
+              <label>Danh mục <span class="req">*</span></label>
+              <select formControlName="categoryID"
+                [class.input-error]="form.controls['categoryID'].invalid && form.controls['categoryID'].touched">
+                <option value="">Chọn danh mục</option>
+                <option *ngFor="let c of categories" [value]="c.categoryID">{{ c.name }}</option>
+              </select>
+              <span class="text-error" *ngIf="form.controls['categoryID'].invalid && form.controls['categoryID'].touched">
+                Bạn phải chọn danh mục
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Giá & Kho -->
+        <div class="form-section">
+          <div class="form-section-title">💰 Giá bán & Kho hàng</div>
+          <div class="form-grid-3">
+            <div class="form-field">
+              <label>Giá bán (VNĐ) <span class="req">*</span></label>
+              <input type="number" formControlName="price" placeholder="0"
+                [class.input-error]="form.controls['price'].invalid && form.controls['price'].touched" />
+              <span class="text-error" *ngIf="form.controls['price'].invalid && form.controls['price'].touched">
+                Giá bán phải ≥ 0
+              </span>
+            </div>
+            <div class="form-field">
+              <label>Giảm giá (%)</label>
+              <input type="number" formControlName="discount" placeholder="0" min="0" max="100" />
+            </div>
+            <div class="form-field">
+              <label>Tồn kho</label>
+              <input type="number" formControlName="stockQuantity" placeholder="0" min="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Trạng thái & Mô tả -->
+        <div class="form-section">
+          <div class="form-section-title">📝 Trạng thái & Mô tả</div>
+          <div class="form-field" style="margin-bottom:10px">
+            <label>Trạng thái</label>
+            <select formControlName="status">
+              <option [ngValue]="true">✅ Hoạt động</option>
+              <option [ngValue]="false">❌ Ngừng hoạt động</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Mô tả sản phẩm</label>
+            <textarea formControlName="description" placeholder="Nhập mô tả chi tiết về sản phẩm"></textarea>
+          </div>
+        </div>
+
+      </form>
+    </div><!-- /pop-scroll -->
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeFormPopup()">Hủy</button>
+      <button class="pbtn" [ngClass]="isEdit ? 'pbtn-blue' : 'pbtn-green'"
+        (click)="saveProduct()" [disabled]="formPopup.loading">
+        <span class="spinner" *ngIf="formPopup.loading"></span>
+        {{ isEdit ? '💾 Lưu cập nhật' : '➕ Thêm mới' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP XÓA ══ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" style="max-width:420px" (click)="$event.stopPropagation()">
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Xóa sản phẩm</div>
+        <div class="pop-head-sub">Không thể hoàn tác hành động này</div>
+      </div>
+      <button class="pop-close" (click)="closeDelPopup()">✕</button>
+    </div>
+    <div class="pop-body">
+      <div class="del-preview">
+        <div class="del-ico">📦</div>
+        <div>
+          <div class="del-id">{{ delPopup.name }}</div>
+          <div class="del-sub">ID #{{ delPopup.id }} · {{ delPopup.brandName }}</div>
+        </div>
+      </div>
+      <div class="del-warn">⚠️ Sản phẩm sẽ bị xóa vĩnh viễn khỏi hệ thống.</div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeDelPopup()">Hủy</button>
+      <button class="pbtn pbtn-red" (click)="confirmDelete()" [disabled]="delPopup.loading">
+        <span class="spinner" *ngIf="delPopup.loading"></span>
+        🗑️ Xóa ngay
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE ══ -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">📦 Quản Lý Sản Phẩm</div>
+      <div class="page-sub">Thêm, sửa, xóa và quản lý danh sách sản phẩm</div>
+    </div>
+    <button class="btn-add" (click)="openAddPopup()">
+      <span>➕</span> Thêm sản phẩm
+    </button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#fff0f1">📦</div>
+      <div>
+        <div class="stat-val">{{ total }}</div>
+        <div class="stat-lbl">Tổng sản phẩm</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#edfaf3">✅</div>
+      <div>
+        <div class="stat-val">{{ countByStatus(true) }}</div>
+        <div class="stat-lbl">Đang hoạt động</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#fff0f1">❌</div>
+      <div>
+        <div class="stat-val">{{ countByStatus(false) }}</div>
+        <div class="stat-lbl">Ngừng hoạt động</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#fff7ed">🏷️</div>
+      <div>
+        <div class="stat-val">{{ countDiscounted() }}</div>
+        <div class="stat-lbl">Đang giảm giá</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div class="card">
+    <div class="card-body search-row">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input class="search-input" [(ngModel)]="search"
+          (keyup.enter)="searchProducts()"
+          placeholder="Tìm theo tên sản phẩm, thương hiệu..." />
+        <button class="search-clear" *ngIf="search" (click)="search=''; searchProducts()">✕</button>
+      </div>
+      <button class="btn-add" style="padding:9px 16px;font-size:12px" (click)="searchProducts()">🔍 Tìm kiếm</button>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-title-dot"></span>
+        Danh sách sản phẩm
+      </div>
+      <span class="badge-count">{{ total }} sản phẩm</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên sản phẩm</th>
+            <th>Thương hiệu</th>
+            <th>Danh mục</th>
+            <th>Giá bán</th>
+            <th>Giảm giá</th>
+            <th>Tồn kho</th>
+            <th>Trạng thái</th>
+            <th style="text-align:center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="products.length > 0; else emptyTpl">
+            <tr *ngFor="let p of products">
+              <td><span class="cell-id">#{{ p.productID }}</span></td>
+              <td>
+                <div class="cell-name">{{ p.name }}</div>
+                <div class="cell-desc">{{ p.description }}</div>
+              </td>
+              <td><span class="pill-blue">{{ p.brandName }}</span></td>
+              <td><span class="pill-blue">{{ p.categoryName }}</span></td>
+              <td>
+                <span class="price-now">{{ p.price * (1 - p.discount / 100) | currency:'VND':'symbol':'1.0-0' }}</span>
+                <span class="price-old" *ngIf="p.discount > 0">{{ p.price | currency:'VND':'symbol':'1.0-0' }}</span>
+              </td>
+              <td>
+                <span class="badge-disc" *ngIf="p.discount > 0">{{ p.discount }}%</span>
+                <span style="color:var(--muted)" *ngIf="p.discount === 0">—</span>
+              </td>
+              <td>
+                <span [ngClass]="{
+                  'stock-low':    p.stockQuantity < 10,
+                  'stock-medium': p.stockQuantity >= 10 && p.stockQuantity < 50,
+                  'stock-high':   p.stockQuantity >= 50
+                }">{{ p.stockQuantity }}</span>
+              </td>
+              <td>
+                <span class="badge-status" [ngClass]="p.status ? 'status-active' : 'status-inactive'">
+                  {{ p.status ? '✅ Hoạt động' : '❌ Ngừng' }}
+                </span>
+              </td>
+              <td>
+                <div class="cell-actions">
+                  <button class="btn-icon-edit" (click)="openEditPopup(p)" title="Chỉnh sửa">✏️</button>
+                  <button class="btn-icon-del"  (click)="openDelPopup(p)"  title="Xóa">🗑</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #emptyTpl>
+            <tr><td colspan="9">
+              <div class="empty-state">
+                <div class="empty-ico">📦</div>
+                <p>Không tìm thấy sản phẩm nào</p>
+                <button class="btn-add" (click)="openAddPopup()">➕ Thêm sản phẩm đầu tiên</button>
+              </div>
+            </td></tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="total > 0">
+      <div class="pag-info">Trang {{ page }}/{{ totalPages }} · {{ total }} sản phẩm</div>
+      <div class="pag-btns">
+        <button class="pag-btn" (click)="changePage(1)"        [disabled]="page===1">«</button>
+        <button class="pag-btn" (click)="changePage(page - 1)" [disabled]="page===1">‹</button>
+        <ng-container *ngFor="let p of pageNumbers()">
+          <span style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:800" *ngIf="p===-1">…</span>
+          <button class="pag-btn" *ngIf="p!==-1"
+            [class.active]="p===page" (click)="changePage(p)">{{ p }}</button>
+        </ng-container>
+        <button class="pag-btn" (click)="changePage(page + 1)" [disabled]="page===totalPages">›</button>
+        <button class="pag-btn" (click)="changePage(totalPages)" [disabled]="page===totalPages">»</button>
+      </div>
+    </div>
+
+    <div class="table-footer">
+      <span>Hiển thị {{ products.length }}/{{ total }} sản phẩm</span>
+      <span>Tuan Anh Mobile · Product Manager v2.0</span>
+    </div>
+  </div>
+
+</div><!-- /page -->

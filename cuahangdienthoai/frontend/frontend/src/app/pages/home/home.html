@@ -1,0 +1,138 @@
+<div class="topbar">
+
+  <!-- Nút 3 gạch -->
+  <button class="hamburger" (click)="toggleSidebar()" [class.open]="sidebarOpen">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- Brand / Logo -->
+  <a class="brand" [routerLink]="'/'">
+    <div class="brand-box">
+      <img src="assets/logo.jpg" alt="logo" />
+    </div>
+    <div>
+      <div class="brand-name">TUAN ANH MOBILE</div>
+    </div>
+  </a>
+
+  <!-- Search -->
+  <div class="topbar-search">
+    <span class="topbar-search-icon">🔍</span>
+    <input type="search" placeholder="Bạn tìm gì..." />
+  </div>
+   <div class="topbar-right">
+    <a href="https://maps.app.goo.gl/jxKMhbae8RwJpeqW7" target="_blank" class="topbar-link">
+      📍 Vị trí cửa hàng
+    </a>
+ 
+    <!-- Chưa đăng nhập -->
+    <a *ngIf="!userName" [routerLink]="'/login'" class="topbar-link login">
+      👤 Đăng nhập
+    </a>
+ 
+    <!-- Đã đăng nhập — hiển thị tên + vai trò + logout -->
+    <div *ngIf="userName" class="user-chip">
+      <span class="user-avatar">{{ userName.charAt(0).toUpperCase() }}</span>
+      <div class="user-info">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role"
+          [ngClass]="userRole === 'Admin' ? 'role-admin' : 'role-staff'">
+          {{ userRole === 'Admin' ? '👑 Admin' : '🛠️ Staff' }}
+        </span>
+      </div>
+      <button class="user-logout" (click)="logout()" title="Đăng xuất">↩</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── OVERLAY (click ngoài để đóng) ── -->
+<div class="sidebar-overlay" [class.show]="sidebarOpen" (click)="closeSidebar()"></div>
+<aside class="sidebar" [class.open]="sidebarOpen">
+
+  <!-- Header drawer -->
+  <div class="sidebar-head">
+    <div class="sidebar-head-left">
+      <div class="sidebar-head-av">⚙️</div>
+      <div>
+        <div class="sidebar-head-title">Quản lý hệ thống</div>
+        <div class="sidebar-head-sub">Tuan Anh Mobile Admin</div>
+      </div>
+    </div>
+    <button class="sidebar-close-btn" (click)="closeSidebar()">✕</button>
+  </div>
+
+  <!-- Menu list -->
+  <div class="sidebar-body">
+    <div class="sidebar-hdr">Chức năng quản lý</div>
+    <ul class="sidebar-menu">
+      <li
+        *ngFor="let section of managementSections"
+        class="menu-item"
+        (click)="navigateTo(section.route)"
+        [ngClass]="{ active: router.url === section.route }"
+      >
+        <span class="icon">{{ getIcon(section.name) }}</span>
+        <span class="menu-label">{{ section.name }}</span>
+        <span class="menu-chevron">›</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Footer drawer -->
+  <div class="sidebar-foot">
+    <span>📞 0394140197</span>
+    <span class="sidebar-version">v1.0</span>
+  </div>
+
+</aside>
+
+<!-- ── BODY ── -->
+<div class="app-body">
+  <main class="main-content">
+
+    <div class="dash-greeting">
+      <div class="dash-title">Trang quản lý</div>
+      <div class="dash-sub">Chào mừng trở lại! Đây là tổng quan hoạt động hôm nay.</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon si-blue">📦</div>
+        <div class="stat-info">
+          <div class="stat-val">{{ totalProducts }}</div>
+          <div class="stat-lbl">Tổng sản phẩm</div>
+          <span class="stat-badge">Đang bán</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-orange">🛒</div>
+        <div class="stat-info">
+          <div class="stat-val">{{ pendingOrders }}</div>
+          <div class="stat-lbl">Đơn hàng mới</div>
+          <span class="stat-badge" style="background:#fff7ed;color:#c2410c">Chờ xử lý</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-green">💰</div>
+        <div class="stat-info">
+          <div class="stat-val" style="font-size:20px">{{ revenue | number:'1.0-0' }}₫</div>
+          <div class="stat-lbl">Doanh thu</div>
+          <span class="stat-badge">Tháng này</span>
+        </div>
+      </div>
+    </div>
+    <div class="outlet-zone">
+      <router-outlet></router-outlet>
+    </div>
+
+  </main>
+</div>
+
+<footer class="footer">
+  <strong>🏬 TUAN ANH MOBILE</strong>
+  <span>© 2026 Copyright</span>
+  <span>📞 0394140197</span>
+  <span>✉️ hoangmanhhoan04@gmail.com</span>
+</footer>

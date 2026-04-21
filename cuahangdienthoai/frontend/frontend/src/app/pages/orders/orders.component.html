@@ -1,0 +1,475 @@
+<!-- orders.component.html -->
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-box">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S14.93 13 13 13H7v-2h6c.83 0 1.5-.67 1.5-1.5S13.83 9 13 9H6V7h7z"/></svg>
+    </div>
+    Tuan Anh Mobile
+  </div>
+  <div class="topnav">
+    <div class="topnav-item active">📦 Đơn hàng</div>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div> Admin
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  {{ toast.message }}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     POPUP 1 — XÓA ĐƠN HÀNG
+══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" style="max-width:420px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Xác nhận xóa đơn hàng</div>
+        <div class="pop-head-sub">Hành động này không thể hoàn tác</div>
+      </div>
+      <button class="pop-close" (click)="closeDelPopup()">✕</button>
+    </div>
+
+    <div class="pop-body">
+      <div class="del-preview">
+        <div class="del-preview-ico">📦</div>
+        <div>
+          <div class="del-preview-id">#{{ delPopup.id }}</div>
+          <div class="del-preview-sub">Đơn hàng · {{ delPopup.userID ? 'User #' + delPopup.userID : '' }}</div>
+        </div>
+      </div>
+      <div class="del-warn">
+        <span>⚠️</span>
+        Tất cả dữ liệu liên quan đến đơn hàng này sẽ bị xóa vĩnh viễn.
+      </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeDelPopup()">Hủy bỏ</button>
+      <button class="pbtn pbtn-red"   (click)="confirmDelete()">
+        <span class="spinner" *ngIf="delPopup.loading"></span>
+        🗑️ Xóa ngay
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     POPUP 2 — ĐỔI TRẠNG THÁI
+══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="statusPopup.show" (click)="closeStatusPopup()">
+  <div class="popup-box" style="max-width:400px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head warn">
+      <div class="pop-head-ico">🔄</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Cập nhật trạng thái</div>
+        <div class="pop-head-sub">Đơn hàng #{{ statusPopup.orderId }}</div>
+      </div>
+      <button class="pop-close" (click)="closeStatusPopup()">✕</button>
+    </div>
+
+    <div class="pop-body">
+      <div class="status-preview">
+        <div class="status-preview-id">Đơn hàng #{{ statusPopup.orderId }}</div>
+        <div class="status-preview-sub">Chọn trạng thái mới</div>
+      </div>
+      <div class="status-opts">
+  <div class="status-opt"
+    [ngClass]="statusPopup.newStatus === 'Pending' ? 'sel-Pending' : ''"
+    (click)="statusPopup.newStatus = 'Pending'">
+    <span class="status-opt-ico">⏳</span> Pending
+  </div>
+          <div class="status-opt"
+            [ngClass]="statusPopup.newStatus === 'Shipping' ? 'sel-Shipping' : ''"
+            (click)="statusPopup.newStatus = 'Shipping'">
+            <span class="status-opt-ico">🚚</span> Shipping
+          </div>
+
+          <!-- ✅ Disable nếu chưa thanh toán -->
+          <div class="status-opt"
+            [ngClass]="statusPopup.newStatus === 'Completed' ? 'sel-Completed' : ''"
+            [class.disabled]="!canComplete(statusPopup.order!)"
+            (click)="canComplete(statusPopup.order!) && (statusPopup.newStatus = 'Completed')"
+            [title]="!canComplete(statusPopup.order!) ? 'Đơn hàng chưa thanh toán' : ''">
+            <span class="status-opt-ico">✅</span> Completed
+            <span class="pay-lock" *ngIf="!canComplete(statusPopup.order!)">🔒</span>
+          </div>
+
+          <div class="status-opt"
+            [ngClass]="statusPopup.newStatus === 'Cancelled' ? 'sel-Cancelled' : ''"
+            (click)="statusPopup.newStatus = 'Cancelled'">
+            <span class="status-opt-ico">❌</span> Cancelled
+          </div>
+        </div>
+
+        <!-- ✅ Warning khi chưa thanh toán -->
+        <div class="pay-warn" *ngIf="!canComplete(statusPopup.order!)">
+          ⚠️ Đơn hàng chưa thanh toán — không thể chuyển sang Completed
+        </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeStatusPopup()">Hủy</button>
+      <button class="pbtn pbtn-warn"  (click)="confirmStatus()">💾 Lưu thay đổi</button>
+    </div>
+
+  </div>
+</div>
+<div class="popup-overlay" [class.show]="editInfoPopup.show" (click)="closeEditInfoPopup()">
+  <div class="popup-box" style="max-width:440px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head detail-hdr">
+      <div class="pop-head-ico">✏️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Sửa thông tin người nhận</div>
+        <div class="pop-head-sub">Đơn hàng #{{ editInfoPopup.orderId }}</div>
+      </div>
+      <button class="pop-close" (click)="closeEditInfoPopup()">✕</button>
+    </div>
+
+    <div class="pop-body">
+      <div class="field">
+        <label>Người nhận *</label>
+        <input [(ngModel)]="editInfoPopup.form.receiverName" placeholder="Họ và tên"/>
+      </div>
+      <div class="field">
+        <label>Số điện thoại *</label>
+        <input [(ngModel)]="editInfoPopup.form.receiverPhone" placeholder="09xx xxx xxx"/>
+      </div>
+      <div class="field">
+        <label>Địa chỉ giao hàng *</label>
+        <input [(ngModel)]="editInfoPopup.form.shippingAddress" placeholder="Số nhà, đường, quận, thành phố"/>
+      </div>
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeEditInfoPopup()">Hủy</button>
+      <button class="pbtn pbtn-blue" (click)="confirmEditInfo()" [disabled]="editInfoPopup.saving">
+        <span class="spinner" *ngIf="editInfoPopup.saving"></span>
+        💾 Lưu thay đổi
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     POPUP 3 — TẠO ĐƠN HÀNG MỚI
+══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="showAddForm" (click)="closeAddForm()">
+  <div class="popup-box" style="max-width:540px" (click)="$event.stopPropagation()">
+
+    <div class="pop-head create">
+      <div class="pop-head-ico">➕</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Tạo Đơn Hàng Mới</div>
+        <div class="pop-head-sub">Nhập thông tin đầy đủ để tạo đơn</div>
+      </div>
+      <button class="pop-close" (click)="closeAddForm()">✕</button>
+    </div>
+
+    <div class="pop-body">
+
+      <div class="section-label">Thông tin khách hàng</div>
+
+      <div class="field">
+        <label>User ID *</label>
+        <input type="number" [(ngModel)]="newOrderUserId" placeholder="Nhập ID người dùng"/>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Người nhận *</label>
+          <input [(ngModel)]="receiverName" placeholder="Họ tên"/>
+        </div>
+        <div class="field">
+          <label>Điện thoại *</label>
+          <input [(ngModel)]="receiverPhone" placeholder="09xx xxx xxx"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Địa chỉ giao hàng *</label>
+        <input [(ngModel)]="shippingAddress" placeholder="Số nhà, đường, quận, thành phố"/>
+      </div>
+
+      <div class="section-label">Phương thức thanh toán</div>
+      <div class="field">
+        <label>Chọn phương thức</label>
+        <select [(ngModel)]="paymentMethod">
+          <option value="COD">💵 Thanh toán khi nhận (COD)</option>
+          <option value="Momo">💜 Momo</option>
+          <option value="ZaloPay">🔵 ZaloPay</option>
+        </select>
+      </div>
+
+      <div class="section-label">Sản phẩm</div>
+
+      <div class="item-row" *ngFor="let d of newDetails; let i = index">
+        <div>
+          <div class="item-lbl">Product ID</div>
+          <input type="number" placeholder="ID SP" [(ngModel)]="d.productID" (change)="onProductChange(d)"/>
+        </div>
+        <div>
+          <div class="item-lbl">Số lượng</div>
+          <input type="number" placeholder="SL" [(ngModel)]="d.quantity" min="1"/>
+        </div>
+        <div>
+          <div class="item-lbl">Đơn giá</div>
+          <input type="number" [value]="d.unitPrice" disabled/>
+        </div>
+        <button class="btn-remove" (click)="removeDetail(i)">✕</button>
+      </div>
+
+      <button class="btn-add-item" (click)="addDetail()">＋ Thêm sản phẩm</button>
+
+      <div class="qr-box" *ngIf="qrCode">
+        <p>📱 Quét mã để thanh toán</p>
+        <img [src]="qrCode" width="180"/>
+      </div>
+
+    </div>
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeAddForm()">Hủy</button>
+      <button class="pbtn pbtn-green" (click)="createOrder()" [disabled]="isCreating">
+        <span class="spinner" *ngIf="isCreating"></span>
+        ✅ Đặt hàng
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE
+══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">📦 Quản Lý Đơn Hàng</div>
+      <div class="page-sub">Theo dõi và xử lý tất cả đơn hàng</div>
+    </div>
+    <button class="btn btn-red" (click)="openAddForm()">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Tạo đơn hàng
+    </button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-icon si-blue">📦</div><div><div class="stat-val">{{ orders.length }}</div><div class="stat-lbl">Tổng đơn hàng</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-orange">⏳</div><div><div class="stat-val">{{ countByStatus('Pending') }}</div><div class="stat-lbl">Chờ xử lý</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-blue">🚚</div><div><div class="stat-val">{{ countByStatus('Shipping') }}</div><div class="stat-lbl">Đang giao</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-val">{{ countByStatus('Completed') }}</div><div class="stat-lbl">Hoàn thành</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-red">❌</div><div><div class="stat-val">{{ countByStatus('Cancelled') }}</div><div class="stat-lbl">Đã hủy</div></div></div>
+  </div>
+
+  <!-- 2-col layout -->
+  <div class="layout-grid">
+
+    <!-- LEFT: TABLE -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-hdr-left">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+          </div>
+          <span class="card-ttl">Danh Sách Đơn Hàng</span>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-bar">
+
+        <!-- text search -->
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5a6.5 6.5 0 1 0-6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input [(ngModel)]="searchText" placeholder="Tìm theo mã đơn, User ID, địa chỉ..." (input)="onSearch()"/>
+        </div>
+
+        <!-- status filter -->
+        <select class="filter-select" [(ngModel)]="filterStatus" (change)="onSearch()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="Pending">⏳ Pending</option>
+          <option value="Shipping">🚚 Shipping</option>
+          <option value="Completed">✅ Completed</option>
+          <option value="Cancelled">❌ Cancelled</option>
+        </select>
+         <button class="btn btn-red" style="padding:8px 16px;font-size:12px" (click)="onSearch()">
+          🔍 Tìm kiếm
+        </button>
+        <!-- clear -->
+        <button class="btn-clear" (click)="clearSearch()" *ngIf="searchText || filterStatus">
+          ✕ Xoá lọc
+        </button>
+
+        <span class="search-count">{{ filteredOrders.length }} kết quả</span>
+      </div>
+
+      <!-- Table -->
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã đơn</th>
+              <th>User</th>
+              <th>Ngày đặt</th>
+              <th>Tổng tiền</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngIf="pagedOrders.length > 0; else emptyTbl">
+              <tr *ngFor="let o of pagedOrders"
+                (click)="selectOrder(o)"
+                [class.row-active]="selectedOrder?.orderID === o.orderID">
+                <td><span class="cell-id">#{{ o.orderID }}</span></td>
+                <td><span class="cell-uid">👤 {{ o.userID }}</span></td>
+                <td><span class="cell-date">{{ o.orderDate | date:'dd/MM/yyyy' }}</span></td>
+                <td><span class="cell-amt">{{ o.totalAmount | number:'1.0-0' }}₫</span></td>
+                <td>
+                  <!-- click status pill to open status popup -->
+                  <span class="status-pill" [ngClass]="o.status"
+                    (click)="openStatusPopup(o); $event.stopPropagation()">
+                    {{ o.status === 'Pending' ? '⏳':o.status === 'Shipping' ? '🚚'  : o.status === 'Completed' ? '✅' : '❌' }}
+                    {{ o.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="act-wrap">
+                    <button class="btn-del" (click)="openDelPopup(o); $event.stopPropagation()">🗑 Xóa</button>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            <ng-template #emptyTbl>
+              <tr><td colspan="6">
+                <div class="empty"><span>📭</span><p>Không tìm thấy đơn hàng phù hợp</p></div>
+              </td></tr>
+            </ng-template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination" *ngIf="totalPages > 1 || filteredOrders.length > 0">
+        <div class="pag-info">
+          Trang {{ currentPage }}/{{ totalPages }} · {{ filteredOrders.length }} đơn
+        </div>
+        <div class="pag-btns">
+          <!-- First & Prev -->
+          <button class="pag-btn" (click)="goPage(1)"           [disabled]="currentPage === 1">«</button>
+          <button class="pag-btn" (click)="goPage(currentPage-1)" [disabled]="currentPage === 1">‹</button>
+
+          <!-- Page numbers with ellipsis -->
+          <ng-container *ngFor="let p of pageNumbers()">
+            <span class="pag-ellipsis" *ngIf="p === -1">…</span>
+            <button class="pag-btn" *ngIf="p !== -1"
+              [class.active]="p === currentPage"
+              (click)="goPage(p)">{{ p }}</button>
+          </ng-container>
+
+          <!-- Next & Last -->
+          <button class="pag-btn" (click)="goPage(currentPage+1)" [disabled]="currentPage === totalPages">›</button>
+          <button class="pag-btn" (click)="goPage(totalPages)"    [disabled]="currentPage === totalPages">»</button>
+        </div>
+      </div>
+
+    </div><!-- /LEFT -->
+
+    <!-- RIGHT: DETAIL PANEL -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-hdr-left">
+          <div class="card-icon blue">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+          </div>
+          <span class="card-ttl">{{ selectedOrder ? 'Chi Tiết #' + selectedOrder.orderID : 'Chi Tiết Đơn Hàng' }}</span>
+        </div>
+      </div>
+
+      <!-- Empty -->
+      <div class="detail-empty" *ngIf="!selectedOrder">
+        <div class="det-ico">📄</div>
+        <p>Nhấn vào một đơn hàng để xem chi tiết</p>
+      </div>
+
+      <!-- Detail -->
+      <div class="card-body" *ngIf="selectedOrder">
+        <div class="info-box">
+          <div class="info-row">
+            <span class="info-lbl">👤 Người nhận</span>
+            <span class="info-val">{{ selectedOrder.receiverName || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-lbl">📞 Điện thoại</span>
+            <span class="info-val">{{ selectedOrder.receiverPhone || '—' }}</span>
+          </div>
+          <div class="info-row full">
+            <span class="info-lbl">📍 Địa chỉ</span>
+            <span class="info-val">{{ selectedOrder.shippingAddress || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-lbl">💳 Thanh toán</span>
+            <span class="info-val">{{ selectedOrder.payment?.paymentMethod || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-lbl">📊 Trạng thái</span>
+            <span class="info-val">
+              <span class="status-pill" [ngClass]="selectedOrder.status">
+                {{ selectedOrder.status === 'Pending' ? '⏳' : selectedOrder.status === 'Completed' ? '✅' : '❌' }}
+                {{ selectedOrder.status }}
+              </span>
+            </span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px" *ngIf="selectedOrder">
+          <button class="btn btn-ghost"
+            style="font-size:12px;padding:6px 14px;border:1.5px solid var(--border)"
+            (click)="openEditInfoPopup(selectedOrder)">
+            ✏️ Sửa thông tin
+          </button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th style="text-align:center">SL</th>
+                <th style="text-align:right">Đơn giá</th>
+                <th style="text-align:right">Tạm tính</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let d of selectedOrder.orderDetails">
+                <td style="font-weight:700">{{ d.productName }}</td>
+                <td style="text-align:center">
+                  <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:800">{{ d.quantity }}</span>
+                </td>
+                <td style="text-align:right;color:var(--muted)">{{ d.unitPrice | number:'1.0-0' }}₫</td>
+                <td style="text-align:right;font-weight:800;color:var(--red)">{{ d.quantity * d.unitPrice | number:'1.0-0' }}₫</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="detail-total">
+          <span class="detail-total-lbl">💰 Tổng cộng</span>
+          <span class="detail-total-val">{{ selectedOrder.totalAmount | number:'1.0-0' }}₫</span>
+        </div>
+      </div>
+
+    </div><!-- /RIGHT -->
+
+  </div><!-- /layout-grid -->
+</div><!-- /page -->

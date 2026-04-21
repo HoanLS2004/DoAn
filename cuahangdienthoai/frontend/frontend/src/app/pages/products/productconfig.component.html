@@ -1,0 +1,373 @@
+<!-- product-config.component.html -->
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-brand-icon">⚙️</div>
+    <div>
+      <div class="topbar-brand-name">Tuan Anh Mobile</div>
+    </div>
+  </div>
+  <div class="topbar-nav">
+    <span class="topbar-nav-item active">Cấu hình sản phẩm</span>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    <span>Admin</span>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  <span class="toast-ico">{{ toast.type === 'success' ? '✅' : '❌' }}</span>
+  {{ toast.message }}
+</div>
+
+<!-- ══ POPUP XEM CHI TIẾT ══ -->
+<div class="popup-overlay" [class.show]="viewPopup.show" (click)="closeViewPopup()">
+  <div class="popup-box popup-xl" (click)="$event.stopPropagation()">
+    <div class="pop-head preview-h">
+      <div class="pop-head-ico">🔍</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Chi tiết cấu hình</div>
+        <div class="pop-head-sub">{{ viewPopup.config?.configCode }}</div>
+      </div>
+      <button class="pop-close" (click)="closeViewPopup()">✕</button>
+    </div>
+    <div class="pop-body" *ngIf="viewPopup.config">
+      <div class="spec-grid">
+        <div class="spec-item" *ngFor="let s of getSpecFields(viewPopup.config)">
+          <span class="spec-ico">{{ s.icon }}</span>
+          <div class="spec-content">
+            <div class="spec-label">{{ s.label }}</div>
+            <div class="spec-value">{{ s.value || '—' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeViewPopup()">Đóng</button>
+      <button class="pbtn pbtn-blue" (click)="editFromView(viewPopup.config)">✏️ Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP THÊM / SỬA ══ -->
+<div class="popup-overlay" [class.show]="formPopup.show" (click)="closeFormPopup()">
+  <div class="popup-box popup-xl" (click)="$event.stopPropagation()">
+    <div class="pop-head" [ngClass]="isEdit ? 'edit-h' : 'create-h'">
+      <div class="pop-head-ico">{{ isEdit ? '✏️' : '➕' }}</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">{{ isEdit ? 'Cập nhật cấu hình' : 'Thêm cấu hình mới' }}</div>
+        <div class="pop-head-sub">{{ isEdit ? 'Chỉnh sửa thông tin kỹ thuật' : 'Nhập thông số kỹ thuật sản phẩm' }}</div>
+      </div>
+      <button class="pop-close" (click)="closeFormPopup()">✕</button>
+    </div>
+
+    <div class="pop-body pop-scroll">
+      <!-- Thông tin cơ bản -->
+      <div class="form-section">
+        <div class="form-section-title">📋 Thông tin cơ bản</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>Mã cấu hình <span class="req">*</span></label>
+            <input [(ngModel)]="form.configCode" placeholder="VD: CFG-001"/>
+          </div>
+          <div class="form-field">
+            <label>Product ID <span class="req">*</span></label>
+            <input [(ngModel)]="form.productID" type="number" placeholder="ID sản phẩm"/>
+          </div>
+          <div class="form-field">
+            <label>Màu sắc</label>
+            <input [(ngModel)]="form.color" placeholder="VD: Xanh titan, Đen, Trắng"/>
+          </div>
+          <div class="form-field">
+            <label>Thiết kế / Chất liệu</label>
+            <input [(ngModel)]="form.design" placeholder="VD: Khung nhôm, mặt kính"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Màn hình & Camera -->
+      <div class="form-section">
+        <div class="form-section-title">📱 Màn hình & Camera</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>Màn hình</label>
+            <input [(ngModel)]="form.screen" placeholder="VD: 6.7 inch OLED, 120Hz"/>
+          </div>
+          <div class="form-field">
+            <label>Tần số quét</label>
+            <input [(ngModel)]="form.refreshRate" placeholder="VD: 120Hz"/>
+          </div>
+          <div class="form-field">
+            <label>Camera sau</label>
+            <input [(ngModel)]="form.rearCamera" placeholder="VD: 50MP + 12MP + 10MP"/>
+          </div>
+          <div class="form-field">
+            <label>Camera trước</label>
+            <input [(ngModel)]="form.frontCamera" placeholder="VD: 12MP"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hiệu năng -->
+      <div class="form-section">
+        <div class="form-section-title">🚀 Hiệu năng</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>CPU</label>
+            <input [(ngModel)]="form.cpu" placeholder="VD: Apple A17 Pro"/>
+          </div>
+          <div class="form-field">
+            <label>GPU</label>
+            <input [(ngModel)]="form.gpu" placeholder="VD: Apple GPU 6 nhân"/>
+          </div>
+          <div class="form-field">
+            <label>RAM</label>
+            <input [(ngModel)]="form.ram" placeholder="VD: 8GB"/>
+          </div>
+          <div class="form-field">
+            <label>Bộ nhớ trong</label>
+            <input [(ngModel)]="form.internalStorage" placeholder="VD: 256GB"/>
+          </div>
+          <div class="form-field">
+            <label>Hệ điều hành</label>
+            <input [(ngModel)]="form.operatingSystem" placeholder="VD: iOS 17, Android 14"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kết nối -->
+      <div class="form-section">
+        <div class="form-section-title">📡 Kết nối & Pin</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>SIM</label>
+            <input [(ngModel)]="form.sim" placeholder="VD: 2 Nano SIM"/>
+          </div>
+          <div class="form-field">
+            <label>Mạng</label>
+            <input [(ngModel)]="form.network" placeholder="VD: 5G, 4G LTE"/>
+          </div>
+          <div class="form-field">
+            <label>Pin</label>
+            <input [(ngModel)]="form.battery" placeholder="VD: 4422 mAh"/>
+          </div>
+          <div class="form-field">
+            <label>Sạc</label>
+            <input [(ngModel)]="form.charging" placeholder="VD: 20W có dây, 15W MagSafe"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tính năng khác -->
+      <div class="form-section">
+        <div class="form-section-title">🔒 Tính năng khác</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>Vân tay / Face ID</label>
+            <input [(ngModel)]="form.fingerprint" placeholder="VD: Face ID, dưới màn hình"/>
+          </div>
+          <div class="form-field">
+            <label>Kháng nước</label>
+            <input [(ngModel)]="form.waterResistance" placeholder="VD: IP68"/>
+          </div>
+          <div class="form-field">
+            <label>Trọng lượng</label>
+            <input [(ngModel)]="form.weight" placeholder="VD: 187g"/>
+          </div>
+        </div>
+      </div>
+    </div><!-- /pop-scroll -->
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeFormPopup()">Hủy</button>
+      <button class="pbtn" [ngClass]="isEdit ? 'pbtn-blue' : 'pbtn-green'"
+        (click)="isEdit ? update() : create()" [disabled]="formPopup.loading">
+        <span class="spinner" *ngIf="formPopup.loading"></span>
+        {{ isEdit ? '💾 Lưu cập nhật' : '➕ Thêm mới' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP XÓA ══ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" style="max-width:420px" (click)="$event.stopPropagation()">
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Xóa cấu hình</div>
+        <div class="pop-head-sub">Không thể hoàn tác hành động này</div>
+      </div>
+      <button class="pop-close" (click)="closeDelPopup()">✕</button>
+    </div>
+    <div class="pop-body">
+      <div class="del-preview">
+        <div class="del-ico">⚙️</div>
+        <div>
+          <div class="del-id">{{ delPopup.configCode }}</div>
+          <div class="del-sub">ProductID #{{ delPopup.productID }}</div>
+        </div>
+      </div>
+      <div class="del-warn">⚠️ Toàn bộ thông số kỹ thuật sẽ bị xóa vĩnh viễn.</div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeDelPopup()">Hủy</button>
+      <button class="pbtn pbtn-red" (click)="confirmDelete()" [disabled]="delPopup.loading">
+        <span class="spinner" *ngIf="delPopup.loading"></span>
+        🗑️ Xóa ngay
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE ══ -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title">⚙️ Cấu hình sản phẩm</div>
+      <div class="page-sub">Quản lý thông số kỹ thuật chi tiết của từng sản phẩm</div>
+    </div>
+    <button class="btn-add" (click)="openAddPopup()">
+      <span>➕</span> Thêm cấu hình
+    </button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#fff0f1">⚙️</div>
+      <div class="stat-body">
+        <div class="stat-val">{{ configs.length }}</div>
+        <div class="stat-lbl">Tổng cấu hình</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#edfaf3">📱</div>
+      <div class="stat-body">
+        <div class="stat-val">{{ uniqueProducts }}</div>
+        <div class="stat-lbl">Sản phẩm có cấu hình</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico" style="background:#eff6ff">🔍</div>
+      <div class="stat-body">
+        <div class="stat-val">{{ filteredConfigs.length }}</div>
+        <div class="stat-lbl">Kết quả tìm kiếm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+ <div class="card">
+  <div class="card-body search-row">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input class="search-input" [(ngModel)]="searchText"
+        (keyup.enter)="onSearch()"
+        placeholder="Tìm theo mã cấu hình, CPU, RAM, màu sắc..."/>
+      <button class="search-clear" *ngIf="searchText" (click)="clearSearch()">✕</button>
+    </div>
+    <button class="btn-add" style="padding:9px 16px;font-size:12px" (click)="onSearch()">🔍 Tìm kiếm</button>
+    <div class="search-count" *ngIf="searchText">
+      {{ filteredConfigs.length }} kết quả
+    </div>
+  </div>
+</div>
+
+  <!-- Table card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-title-dot"></span>
+        Danh sách cấu hình
+      </div>
+      <span class="badge-count">{{ filteredConfigs.length }}</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Mã cấu hình</th>
+            <th>Product ID</th>
+            <th>CPU</th>
+            <th>RAM</th>
+            <th>Bộ nhớ</th>
+            <th>Màn hình</th>
+            <th>Pin</th>
+            <th>Màu</th>
+            <th style="text-align:center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="pagedConfigs.length > 0; else emptyTpl">
+            <tr *ngFor="let c of pagedConfigs" class="table-row" (click)="openViewPopup(c)">
+              <td>
+                <span class="config-code">{{ c.configCode }}</span>
+              </td>
+              <td>
+                <span class="pill-blue">📱 #{{ c.productID }}</span>
+              </td>
+              <td><span class="cell-spec">{{ c.cpu || '—' }}</span></td>
+              <td><span class="pill-ram">{{ c.ram || '—' }}</span></td>
+              <td><span class="cell-spec">{{ c.internalStorage || '—' }}</span></td>
+              <td><span class="cell-spec ellipsis">{{ c.screen || '—' }}</span></td>
+              <td><span class="cell-spec">{{ c.battery || '—' }}</span></td>
+              <td>
+                <span class="color-dot" *ngIf="c.color"
+                  [style.background]="getColorHex(c.color)"
+                  [title]="c.color">
+                </span>
+                <span class="cell-spec">{{ c.color || '—' }}</span>
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <div class="cell-actions">
+                  <button class="btn-icon-edit" (click)="openEditPopup(c)" title="Chỉnh sửa">✏️</button>
+                  <button class="btn-icon-del"  (click)="openDelPopup(c)"  title="Xóa">🗑</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #emptyTpl>
+            <tr>
+              <td colspan="9">
+                <div class="empty-state">
+                  <div class="empty-ico">⚙️</div>
+                  <p>Chưa có cấu hình nào</p>
+                  <button class="btn-add-sm" (click)="openAddPopup()">➕ Thêm cấu hình đầu tiên</button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="filteredConfigs.length > 0">
+      <div class="pag-info">Trang {{ currentPage }}/{{ totalPages }} · {{ filteredConfigs.length }} cấu hình</div>
+      <div class="pag-btns">
+        <button class="pag-btn" (click)="goPage(1)"             [disabled]="currentPage===1">«</button>
+        <button class="pag-btn" (click)="goPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+        <ng-container *ngFor="let p of pageNumbers()">
+          <span class="pag-ellipsis" *ngIf="p===-1">…</span>
+          <button class="pag-btn" *ngIf="p!==-1"
+            [class.active]="p===currentPage" (click)="goPage(p)">{{ p }}</button>
+        </ng-container>
+        <button class="pag-btn" (click)="goPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
+        <button class="pag-btn" (click)="goPage(totalPages)"    [disabled]="currentPage===totalPages">»</button>
+      </div>
+    </div>
+
+    <div class="table-footer">
+      <span>Hiển thị {{ pagedConfigs.length }}/{{ filteredConfigs.length }} cấu hình</span>
+      <span>Tuan Anh Mobile · Config Manager v1.0</span>
+    </div>
+  </div>
+
+</div><!-- /page -->

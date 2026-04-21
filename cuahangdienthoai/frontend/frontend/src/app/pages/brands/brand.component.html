@@ -1,0 +1,132 @@
+<!-- brand.component.html -->
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand-logo">
+    <div class="brand-box-logo">
+      <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 .59 1.42l9 9A2 2 0 0 0 13 22a2 2 0 0 0 1.41-.59l7-7A2 2 0 0 0 22 13a2 2 0 0 0-.59-1.42zM5.5 7A1.5 1.5 0 1 1 7 5.5 1.5 1.5 0 0 1 5.5 7z"/></svg>
+    </div>
+    Tuan Anh Mobile
+  </div>
+  <div class="topnav">
+    <div class="topnav-item active">Nhãn hiệu</div>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    Admin
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast"
+  [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  {{ toast.message }}
+</div>
+
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title">Quản Lý Nhãn Hiệu</div>
+    <div class="page-sub">Thêm, sửa, xóa thương hiệu sản phẩm</div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon si-blue">🏷️</div>
+      <div>
+        <div class="stat-val">{{ brands.length }}</div>
+        <div class="stat-lbl">Tổng nhãn hiệu</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-green">✅</div>
+      <div>
+        <div class="stat-val">{{ brands.length }}</div>
+        <div class="stat-lbl">Đang hoạt động</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-red">📝</div>
+      <div>
+        <div class="stat-val">{{ editingId ? 1 : 0 }}</div>
+        <div class="stat-lbl">Đang chỉnh sửa</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-left">
+        <div class="card-icon" [class.green]="!editingId" [class.blue]="!!editingId">
+          <svg *ngIf="!editingId" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <svg *ngIf="editingId"  viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </div>
+        <span class="card-ttl">{{ editingId ? 'Chỉnh Sửa Nhãn Hiệu' : 'Thêm Nhãn Hiệu Mới' }}</span>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="mode-bar" [ngClass]="editingId ? 'mode-edit' : 'mode-add'">
+        <span *ngIf="!editingId">➕ Nhập tên nhãn hiệu để thêm mới</span>
+        <span *ngIf="editingId">✏️ Đang sửa nhãn hiệu ID #{{ editingId }}</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Tên nhãn hiệu *</label>
+          <input
+            [(ngModel)]="brandName"
+            placeholder="VD: Samsung, Apple, Xiaomi..."
+            (keyup.enter)="save()"
+          />
+        </div>
+        <div class="form-actions">
+          <button class="btn" [ngClass]="editingId ? 'btn-blue' : 'btn-green'" (click)="save()">
+            <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4z"/></svg>
+            {{ editingId ? 'Lưu cập nhật' : 'Thêm mới' }}
+          </button>
+          <button class="btn btn-ghost" *ngIf="editingId" (click)="resetForm()">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIST CARD -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-left">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        </div>
+        <span class="card-ttl">Danh Sách Nhãn Hiệu</span>
+      </div>
+      <span style="font-size:12px;color:var(--muted);font-weight:700">{{ brands.length }} nhãn hiệu</span>
+    </div>
+
+    <ul class="brand-list">
+      <ng-container *ngIf="brands.length > 0; else emptyState">
+        <li class="brand-item" *ngFor="let b of brands; let i = index">
+          <span class="brand-num">{{ i + 1 }}</span>
+          <span class="brand-name">{{ b.name }}</span>
+          <span class="brand-id">#{{ b.brandID }}</span>
+          <div class="act-wrap">
+            <button class="btn-edit-sm" (click)="edit(b)">✏️ Sửa</button>
+            <button class="btn-del-sm"  (click)="delete(b.brandID)">🗑 Xóa</button>
+          </div>
+        </li>
+      </ng-container>
+      <ng-template #emptyState>
+        <div class="empty"><span>🏷️</span><p>Chưa có nhãn hiệu nào</p></div>
+      </ng-template>
+    </ul>
+
+    <div class="tbl-footer">
+      <span>{{ brands.length }} nhãn hiệu</span>
+      <span>TGDĐ Brand Manager v1.0</span>
+    </div>
+  </div>
+
+</div>

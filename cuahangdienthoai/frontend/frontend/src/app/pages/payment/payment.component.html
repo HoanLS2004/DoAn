@@ -1,0 +1,363 @@
+<!-- payment.component.html -->
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+    </div>
+    Tuan Anh Mobile
+  </div>
+  <div class="topbar-nav">
+    <span class="topbar-nav-item active">Thanh toán</span>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">👤</div>
+    <span>Admin</span>
+  </div>
+</div>
+
+<div class="toast"
+  [ngClass]="{ show: toast.show, success: toast.type==='success', error: toast.type==='error' }">
+  {{ toast.message }}
+</div>
+
+<!-- ══ POPUP THÊM / SỬA ══ -->
+<div class="popup-overlay" [class.show]="formPopup.show" (click)="closeFormPopup()">
+  <div class="popup-box popup-xl" (click)="$event.stopPropagation()">
+
+    <div class="pop-head" [ngClass]="isEdit ? 'edit-h' : 'create-h'">
+      <div class="pop-head-ico">{{ isEdit ? '✏️' : '➕' }}</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">{{ isEdit ? 'Cập nhật giao dịch' : 'Thêm giao dịch mới' }}</div>
+        <div class="pop-head-sub">{{ isEdit ? 'Chỉnh sửa thông tin thanh toán #' + form.paymentID : 'Nhập thông tin giao dịch mới' }}</div>
+      </div>
+      <button class="pop-close" (click)="closeFormPopup()">✕</button>
+    </div>
+
+    <div class="pop-scroll">
+
+      <!-- Thông tin đơn hàng -->
+      <div class="form-section">
+        <div class="form-section-title">🛒 Thông tin đơn hàng</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>Order ID <span class="req">*</span></label>
+            <input [(ngModel)]="form.orderID" type="number" placeholder="Mã đơn hàng" />
+          </div>
+          <div class="form-field">
+            <label>Số tiền (₫) <span class="req">*</span></label>
+            <input [(ngModel)]="form.amount" type="number" placeholder="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Phương thức & trạng thái -->
+      <div class="form-section">
+        <div class="form-section-title">💳 Phương thức & Trạng thái</div>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label>Phương thức thanh toán</label>
+            <select [(ngModel)]="form.paymentMethod">
+              <option value="COD">💵 COD</option>
+              <option value="Momo">💜 Momo</option>
+              <option value="CreditCard">💳 CreditCard</option>
+              <option value="Transfer">🏦 Transfer</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Trạng thái</label>
+            <select [(ngModel)]="form.paymentStatus">
+              <option value="Pending">⏳ Pending</option>
+              <option value="Completed">✅ Completed</option>
+              <option value="Failed">❌ Failed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thời gian -->
+      <div class="form-section">
+        <div class="form-section-title">📅 Thời gian</div>
+        <div class="form-field">
+          <label>Thời gian thanh toán</label>
+          <input [(ngModel)]="form.paidAt" type="datetime-local" />
+        </div>
+      </div>
+
+    </div><!-- /pop-scroll -->
+
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeFormPopup()">Hủy</button>
+      <button class="pbtn" [ngClass]="isEdit ? 'pbtn-blue' : 'pbtn-green'"
+        (click)="isEdit ? update() : create()" [disabled]="formPopup.loading">
+        <span class="spinner" *ngIf="formPopup.loading"></span>
+        {{ isEdit ? '💾 Lưu cập nhật' : '➕ Thêm mới' }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ POPUP XÓA ══ -->
+<div class="popup-overlay" [class.show]="delPopup.show" (click)="closeDelPopup()">
+  <div class="popup-box" style="max-width:420px" (click)="$event.stopPropagation()">
+    <div class="pop-head danger">
+      <div class="pop-head-ico">🗑️</div>
+      <div class="pop-head-txt">
+        <div class="pop-head-ttl">Xóa giao dịch</div>
+        <div class="pop-head-sub">Không thể hoàn tác hành động này</div>
+      </div>
+      <button class="pop-close" (click)="closeDelPopup()">✕</button>
+    </div>
+    <div class="pop-body">
+      <div class="del-preview">
+        <div class="del-ico">💳</div>
+        <div>
+          <div class="del-id">#{{ delPopup.id }}</div>
+          <div class="del-sub">{{ delPopup.amount | number:'1.0-0' }}₫</div>
+        </div>
+      </div>
+      <div class="del-warn">⚠️ Giao dịch này sẽ bị xóa vĩnh viễn.</div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-ghost" (click)="closeDelPopup()">Hủy</button>
+      <button class="pbtn pbtn-red" (click)="confirmDelete()" [disabled]="delPopup.loading">
+        <span class="spinner" *ngIf="delPopup.loading"></span>
+        🗑️ Xóa ngay
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE ══ -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title-group">
+      <div class="page-title">💳 Quản Lý Thanh Toán</div>
+      <div class="page-subtitle">Theo dõi và quản lý tất cả giao dịch thanh toán</div>
+    </div>
+    <button class="btn-add" (click)="openAddPopup()">
+      <span>➕</span> Thêm giao dịch
+    </button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon red">💳</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ payments.length }}</div>
+        <div class="stat-label">Tổng giao dịch</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ getCountByStatus('Completed') }}</div>
+        <div class="stat-label">Hoàn thành</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange">⏳</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ getCountByStatus('Pending') }}</div>
+        <div class="stat-label">Chờ xử lý</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">💰</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ getTotalAmount() | number:'1.0-0' }}₫</div>
+        <div class="stat-label">Doanh thu (Completed)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title-row">
+        <div class="card-title-icon">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </div>
+        <span class="card-title">Tìm kiếm & Lọc</span>
+      </div>
+      <span class="result-count-badge">{{ filteredPayments.length }} kết quả</span>
+    </div>
+    <div class="card-body">
+      <div class="search-bar">
+        <div class="search-field">
+          <label>Order ID</label>
+          <input [(ngModel)]="searchOrder" placeholder="Nhập mã đơn..." (input)="search()" />
+        </div>
+        <div class="search-field">
+          <label>Phương thức</label>
+          <div class="select-wrap">
+            <select [(ngModel)]="searchMethod" (change)="search()">
+              <option value="">Tất cả</option>
+              <option value="COD">💵 COD</option>
+              <option value="Momo">💜 Momo</option>
+              <option value="CreditCard">💳 CreditCard</option>
+              <option value="Transfer">🏦 Transfer</option>
+            </select>
+          </div>
+        </div>
+        <div class="search-field">
+          <label>Trạng thái</label>
+          <div class="select-wrap">
+            <select [(ngModel)]="searchStatus" (change)="search()">
+              <option value="">Tất cả</option>
+              <option value="Completed">✅ Completed</option>
+              <option value="Pending">⏳ Pending</option>
+              <option value="Failed">❌ Failed</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" (click)="search()">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          Tìm kiếm
+        </button>
+        <button class="btn btn-outline" (click)="resetSearch()">✕ Xoá lọc</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title-row">
+        <div class="card-title-dot"></div>
+        <span class="card-title">Danh Sách Giao Dịch</span>
+      </div>
+      <span class="badge-count">{{ filteredPayments.length }}</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>
+              <button class="sort-btn" (click)="sort('paymentID')">
+                ID
+                <span class="sort-ico">
+                  {{ sortField==='paymentID' ? (sortDir==='asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
+            <th>
+              <button class="sort-btn" (click)="sort('orderID')">
+                Order
+                <span class="sort-ico">
+                  {{ sortField==='orderID' ? (sortDir==='asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
+            </th>
+            <th>Phương thức</th>
+                <th>
+                  <button class="sort-btn" (click)="sort('paymentStatus')">
+                    Trạng thái
+                    <span class="sort-ico">
+                      {{ sortField==='paymentStatus' ? (sortDir==='asc' ? '↑' : '↓') : '↕' }}
+                    </span>
+                  </button>
+                </th>
+                <th>
+                  <button class="sort-btn" (click)="sort('amount')">
+                    Số tiền
+                    <span class="sort-ico">
+                      {{ sortField==='amount' ? (sortDir==='asc' ? '↑' : '↓') : '↕' }}
+                    </span>
+                  </button>
+                </th>
+                <th>
+                  <button class="sort-btn" (click)="sort('paidAt')">
+                    Thời gian
+                    <span class="sort-ico">
+                      {{ sortField==='paidAt' ? (sortDir==='asc' ? '↑' : '↓') : '↕' }}
+                    </span>
+                  </button>
+                </th>
+                <th style="text-align:center">Thao tác</th>
+              </tr>
+            </thead>
+        <tbody>
+          <ng-container *ngIf="pagedPayments.length > 0; else emptyTpl">
+            <tr *ngFor="let p of pagedPayments">
+              <td><span class="cell-id">#{{ p.paymentID }}</span></td>
+              <td><span class="order-pill">🛒 {{ p.orderID }}</span></td>
+              <td>
+                <span class="method-badge"
+                  [ngClass]="{
+                    'cod':      p.paymentMethod === 'COD',
+                    'momo':     p.paymentMethod === 'Momo',
+                    'credit':   p.paymentMethod === 'CreditCard',
+                    'transfer': p.paymentMethod === 'Transfer',
+                    'default': !['COD','Momo','CreditCard','Transfer'].includes(p.paymentMethod)
+                  }">
+                  {{ p.paymentMethod === 'COD'        ? '💵 COD' :
+                     p.paymentMethod === 'Momo'       ? '💜 Momo' :
+                     p.paymentMethod === 'CreditCard' ? '💳 CreditCard' :
+                     p.paymentMethod === 'Transfer'   ? '🏦 Transfer' : p.paymentMethod }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge"
+                  [ngClass]="{
+                    'completed': p.paymentStatus === 'Completed',
+                    'pending':   p.paymentStatus === 'Pending',
+                    'failed':    p.paymentStatus === 'Failed',
+                    'default':  !['Completed','Pending','Failed'].includes(p.paymentStatus)
+                  }">
+                  {{ p.paymentStatus === 'Completed' ? '✅ Hoàn thành' :
+                     p.paymentStatus === 'Pending'   ? '⏳ Chờ xử lý' :
+                     p.paymentStatus === 'Failed'    ? '❌ Thất bại'   : p.paymentStatus }}
+                </span>
+              </td>
+              <td><span class="cell-amount">{{ p.amount | number:'1.0-0' }}₫</span></td>
+              <td><span class="cell-date">{{ p.paidAt ? (p.paidAt | date:'HH:mm – dd/MM/yyyy') : '—' }}</span></td>
+              <td>
+                <div class="cell-actions">
+                  <button class="btn-icon-edit" (click)="openEditPopup(p)" title="Chỉnh sửa">✏️</button>
+                  <button class="btn-icon-del"  (click)="openDelPopup(p)"  title="Xóa">🗑</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #emptyTpl>
+            <tr><td colspan="7">
+              <div class="empty-state">
+                <div class="empty-ico">📭</div>
+                <p>Không tìm thấy giao dịch nào</p>
+                <button class="btn-add" (click)="openAddPopup()">➕ Thêm giao dịch đầu tiên</button>
+              </div>
+            </td></tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="filteredPayments.length > 0">
+      <div class="pag-info">Trang {{ currentPage }}/{{ totalPages }} · {{ filteredPayments.length }} giao dịch</div>
+      <div class="pag-btns">
+        <button class="pag-btn" (click)="goPage(1)"             [disabled]="currentPage===1">«</button>
+        <button class="pag-btn" (click)="goPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+        <ng-container *ngFor="let p of pageNumbers()">
+          <span class="pag-ellipsis" *ngIf="p===-1">…</span>
+          <button class="pag-btn" *ngIf="p!==-1"
+            [class.active]="p===currentPage" (click)="goPage(p)">{{ p }}</button>
+        </ng-container>
+        <button class="pag-btn" (click)="goPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
+        <button class="pag-btn" (click)="goPage(totalPages)"    [disabled]="currentPage===totalPages">»</button>
+      </div>
+    </div>
+
+    <div class="table-footer">
+      <span>Hiển thị {{ pagedPayments.length }} / {{ filteredPayments.length }} giao dịch</span>
+      <span>Tuan Anh Mobile · Payment Manager v2.0</span>
+    </div>
+  </div>
+
+</div>

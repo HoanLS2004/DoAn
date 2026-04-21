@@ -1,0 +1,291 @@
+<!-- odersusers.component.html -->
+
+<!-- TOAST -->
+<div class="toast" [ngClass]="{show:toast.show, success:toast.type==='success', error:toast.type==='error', info:toast.type==='info'}">
+  {{ toast.message }}
+</div>
+
+<!-- ════════════════════════════════════════════════
+     POPUP — THANH TOÁN MOMO THÀNH CÔNG
+════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="momoResult === 'success'">
+  <div class="popup-box">
+    <div class="pop-success-body">
+      <div class="pop-success-ani">🎉</div>
+      <div class="pop-success-ttl">Đặt hàng thành công!</div>
+      <div class="pop-success-sub">Cảm ơn bạn đã mua hàng tại TUAN ANH MOBILE</div>
+      <div class="pop-success-order" *ngIf="momoOrderId">Mã đơn hàng: #{{ momoOrderId }}</div>
+      <div class="pop-success-method">💜 Đã thanh toán qua Ví MoMo</div>
+      <div class="pop-success-sub" style="margin-top:8px">Chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất</div>
+    </div>
+    <div class="pop-footer">
+      <button class="pbtn pbtn-blue pbtn-full" (click)="closeMomoBanner()">
+        📦 Xem đơn hàng
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     POPUP — THANH TOÁN MOMO THẤT BẠI
+════════════════════════════════════════════════ -->
+<div class="popup-overlay" [class.show]="momoResult === 'failed'">
+  <div class="popup-box">
+    <div class="pop-success-body">
+      <div class="pop-success-ani">❌</div>
+      <div class="pop-success-ttl" style="color:#dc3545">Thanh toán thất bại!</div>
+      <div class="pop-success-sub">Giao dịch MoMo không thành công</div>
+      <div class="pop-success-sub" style="margin-top:8px">Vui lòng thử lại hoặc chọn phương thức thanh toán khác</div>
+    </div>
+    <div class="pop-footer" style="display:flex;gap:10px">
+      <button class="pbtn pbtn-ghost" (click)="closeMomoBanner()">Đóng</button>
+      <a routerLink="/cart" class="pbtn pbtn-blue" style="text-decoration:none;text-align:center">
+        🛒 Quay lại giỏ hàng
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP HỦY ĐƠN -->
+<div class="overlay" [class.show]="cancelPopup.show" (click)="closeCancelPopup()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-ico">🗑️</div>
+      <div>
+        <div class="modal-title">Hủy đơn #{{ cancelPopup.order?.orderID }}</div>
+        <div class="modal-sub">Hành động không thể hoàn tác</div>
+      </div>
+      <button class="modal-x" (click)="closeCancelPopup()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="c-rows">
+        <div class="c-row"><span>Mã đơn</span><strong>#{{ cancelPopup.order?.orderID }}</strong></div>
+        <div class="c-row"><span>Tổng tiền</span><strong class="rc">{{ cancelPopup.order?.totalAmount | number:'1.0-0' }}₫</strong></div>
+        <div class="c-row"><span>Địa chỉ</span><strong>{{ cancelPopup.order?.shippingAddress }}</strong></div>
+      </div>
+      <div class="c-warn">⚠️ Đơn hàng sẽ không thể khôi phục sau khi hủy.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="mbtn ghost" (click)="closeCancelPopup()">Giữ lại</button>
+      <button class="mbtn danger" (click)="confirmCancel()" [disabled]="isCancelling">
+        <span class="spin" *ngIf="isCancelling"></span>Hủy đơn
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="tb-brand" routerLink="/">
+    <div class="tb-brand-box"><img src="assets/logo.jpg" alt="logo"/></div>
+    <div>
+      <div class="tb-brand-name">TUAN ANH MOBILE</div>
+      <div class="tb-brand-sub">Điện thoại chính hãng</div>
+    </div>
+  </a>
+  <div class="tb-actions">
+    <a routerLink="/" class="tb-btn">🏠 Trang chủ</a>
+    <a routerLink="/cart" class="tb-btn">🛒 Giỏ hàng</a>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- BACK + BREADCRUMB -->
+  <div class="back-nav">
+    <button class="btn-back" onclick="history.back()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Quay lại
+    </button>
+    <div class="breadcrumb">
+      <a routerLink="/">Trang chủ</a>
+      <span class="bc-sep">›</span>
+      <span class="bc-cur">Đơn hàng của tôi</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-title">📦 Đơn hàng của tôi</div>
+        <div class="hero-sub">Theo dõi & quản lý tất cả đơn hàng</div>
+      </div>
+      <div class="hero-stats">
+        <div class="hs" *ngFor="let s of statItems">
+          <div class="hs-num">{{ countByStatus(s.key) }}</div>
+          <div class="hs-lbl">{{ s.label }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button class="ftab" *ngFor="let t of tabs"
+      [class.active]="filterStatus === t.value"
+      (click)="filterStatus = t.value; applyFilter()">
+      {{ t.icon }} {{ t.label }}
+      <span class="ftab-bdg" *ngIf="t.value && countByStatus(t.value) > 0">{{ countByStatus(t.value) }}</span>
+    </button>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-box">
+    <svg class="s-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input [(ngModel)]="searchText" placeholder="Tìm theo mã đơn, tên người nhận, địa chỉ..." (input)="applyFilter()"/>
+    <button class="s-clear" *ngIf="searchText" (click)="searchText=''; applyFilter()">✕</button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="sp-loading" *ngIf="isLoading">
+    <div class="sp-spin"></div>
+    <p>Đang tải đơn hàng...</p>
+  </div>
+
+  <!-- EMPTY -->
+  <div class="sp-empty" *ngIf="!isLoading && filteredOrders.length === 0">
+    <div class="sp-empty-ico">📭</div>
+    <div class="sp-empty-title">Chưa có đơn hàng nào</div>
+    <div class="sp-empty-sub">{{ filterStatus || searchText ? 'Không tìm thấy đơn hàng phù hợp' : 'Hãy bắt đầu mua sắm ngay!' }}</div>
+  </div>
+
+  <!-- ORDER LIST -->
+  <div class="order-list" *ngIf="!isLoading && filteredOrders.length > 0">
+    <div class="order-card"
+      *ngFor="let o of filteredOrders; trackBy: trackById"
+      [class.is-open]="selectedOrder?.orderID === o.orderID">
+
+      <!-- TOP BAR -->
+      <div class="oc-top">
+        <div class="shop-row">
+          <div class="shop-dot"></div>
+          <span class="shop-name">Tuan Anh Mobile</span>
+          <span class="shop-check">✓ Chính hãng</span>
+        </div>
+        <span class="st-pill" [ngClass]="'st-'+o.status">
+          {{ STATUS_META[o.status]?.icon }} {{ STATUS_META[o.status]?.label }}
+        </span>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="oc-preview" (click)="selectOrder(o)">
+        <div class="oc-info">
+          <div class="oc-id">Đơn hàng <span class="rc fw">#{{ o.orderID }}</span></div>
+          <div class="oc-date">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            {{ o.orderDate | date:'dd/MM/yyyy · HH:mm' }}
+          </div>
+          <div class="oc-addr">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ o.shippingAddress }}
+          </div>
+        </div>
+        <div class="oc-right">
+          <div class="oc-price">{{ o.totalAmount | number:'1.0-0' }}₫</div>
+          <div class="oc-hint">{{ selectedOrder?.orderID === o.orderID ? 'Thu gọn' : 'Chi tiết' }}</div>
+          <svg class="oc-arr" [class.open]="selectedOrder?.orderID === o.orderID"
+            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- DETAIL -->
+      <div class="oc-detail" *ngIf="selectedOrder?.orderID === o.orderID" (click)="$event.stopPropagation()">
+
+        <!-- TIMELINE -->
+        <div class="tl-wrap" *ngIf="o.status !== 'Cancelled'">
+          <div class="tl-section-label">Trạng thái đơn hàng</div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar-bg">
+              <div class="tl-bar-fill" [style.width.%]="(currentStep(o.status) / (STATUS_STEPS.length - 1)) * 100"></div>
+            </div>
+          </div>
+          <div class="tl-nodes">
+            <div class="tl-node"
+              *ngFor="let step of STATUS_STEPS; let si = index"
+              [class.done]="currentStep(o.status) > si"
+              [class.active]="currentStep(o.status) === si"
+              [class.future]="currentStep(o.status) < si">
+              <div class="tl-dot">
+                <svg *ngIf="currentStep(o.status) > si" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                <span *ngIf="currentStep(o.status) === si" style="font-size:14px">{{ STATUS_META[step]?.icon }}</span>
+                <span *ngIf="currentStep(o.status) < si" class="tl-num">{{ si + 1 }}</span>
+              </div>
+              <div class="tl-lbl">{{ STATUS_META[step]?.label }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CANCELLED -->
+        <div class="cancelled-bar" *ngIf="o.status === 'Cancelled'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          Đơn hàng này đã bị hủy
+        </div>
+
+        <!-- INFO GIAO HÀNG -->
+        <div class="det-sec">
+          <div class="det-sec-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Thông tin giao hàng
+          </div>
+          <div class="det-grid">
+            <div class="det-f"><span>Người nhận</span><strong>{{ selectedOrder?.receiverName || '—' }}</strong></div>
+            <div class="det-f"><span>Điện thoại</span><strong>{{ selectedOrder?.receiverPhone || '—' }}</strong></div>
+            <div class="det-f full"><span>Địa chỉ</span><strong>{{ selectedOrder?.shippingAddress || '—' }}</strong></div>
+            <div class="det-f"><span>Phương thức TT</span><strong>{{ selectedOrder?.payment?.paymentMethod || '—' }}</strong></div>
+            <div class="det-f">
+              <span>Trạng thái TT</span>
+              <span class="pay-tag" [class.paid]="selectedOrder?.payment?.paymentStatus === 'Completed'">
+                {{ selectedOrder?.payment?.paymentStatus === 'Completed' ? '✅ Đã thanh toán' : '⏳ Chưa thanh toán' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SẢN PHẨM -->
+        <div class="det-sec" *ngIf="selectedOrder?.orderDetails?.length">
+          <div class="det-sec-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Sản phẩm đã đặt
+          </div>
+          <div class="prod-item" *ngFor="let d of selectedOrder!.orderDetails">
+            <div class="prod-thumb">📱</div>
+            <div class="prod-info">
+              <div class="prod-name">{{ d.productName }}</div>
+              <div class="prod-meta">{{ d.unitPrice | number:'1.0-0' }}₫ × {{ d.quantity }}</div>
+            </div>
+            <div class="prod-sub">{{ d.quantity * d.unitPrice | number:'1.0-0' }}₫</div>
+          </div>
+          <div class="total-row">
+            <span>Tổng thanh toán</span>
+            <span class="total-val">{{ selectedOrder!.totalAmount | number:'1.0-0' }}₫</span>
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="act-row">
+          <button class="act-cancel" *ngIf="canCancel(selectedOrder!)" (click)="openCancelPopup(selectedOrder!)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            Hủy đơn hàng
+          </button>
+          <button class="act-close" (click)="selectedOrder = undefined">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+            Thu gọn
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <strong>🏬 TUAN ANH MOBILE</strong>
+  <span>© 2026 Copyright</span>
+  <span>📞 0394140197</span>
+  <span>✉️ hoangmanhhoan04@gmail.com</span>
+</footer>

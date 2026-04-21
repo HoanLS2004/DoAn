@@ -1,0 +1,260 @@
+<div class="page-wrapper">
+
+  <div class="toast-container">
+    <div
+      *ngFor="let toast of toasts"
+      class="toast"
+      [class.toast--visible]="toast.visible"
+      [class.toast--leaving]="toast.leaving"
+      [class.toast--success]="toast.type === 'success'"
+      [class.toast--error]="toast.type === 'error'"
+      [class.toast--info]="toast.type === 'info'"
+    >
+      <div class="toast__stripe"></div>
+      <div class="toast__icon">
+        <span *ngIf="toast.type === 'success'">✓</span>
+        <span *ngIf="toast.type === 'error'">✕</span>
+        <span *ngIf="toast.type === 'info'">i</span>
+      </div>
+      <div class="toast__body">
+        <p class="toast__title">{{ toast.title }}</p>
+        <p class="toast__msg">{{ toast.message }}</p>
+      </div>
+      <button class="toast__close" (click)="dismissToast(toast.id)">×</button>
+      <div class="toast__bar"></div>
+    </div>
+  </div>
+
+
+  <div class="bg-blobs">
+    <div class="blob blob--a"></div>
+    <div class="blob blob--b"></div>
+    <div class="blob blob--c"></div>
+    <div class="blob blob--d"></div>
+  </div>
+  <div class="bg-dots"></div>
+
+  
+  <div class="ring ring--1"></div>
+  <div class="ring ring--2"></div>
+  <div class="ring ring--3"></div>
+  <canvas id="fireflies-canvas" style="position:absolute;inset:0;pointer-events:none;z-index:1;"></canvas>
+  <div class="sparks" id="sparks-container"></div>
+
+  <div class="card">
+
+    <div class="corner-tl"></div>
+    <div class="corner-br"></div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-wrap">
+        <div class="logo-glow"></div>
+        <div class="logo-circle">
+          <span class="logo-emoji">📱</span>
+        </div>
+      </div>
+      <div>
+        <h1 class="brand-name">Cửa Hàng</h1>
+        <p class="brand-sub">DI ĐỘNG &nbsp;·&nbsp; MOBILE STORE</p>
+      </div>
+    </header>
+
+    <!-- Separator -->
+    <div class="separator">
+      <span class="sep-line"></span>
+      <span class="sep-diamond">◆</span>
+      <span class="sep-line"></span>
+    </div>
+
+  
+    <form *ngIf="isLogin" (ngSubmit)="onLogin()" class="form" autocomplete="on">
+
+      <div class="form-title">
+        <p class="form-desc">
+          <span>Đăng nhập để tiếp tục mua sắm &nbsp;·&nbsp;</span>
+          <span>Đăng nhập để tiếp tục mua sắm &nbsp;·&nbsp;</span>
+        </p>
+
+      </div>
+
+      <div class="field-group">
+        <label class="label" for="login-email">Tài khoản / Email</label>
+        <div class="field">
+          <svg class="field__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input
+            id="login-email"
+            class="field__inp"
+            type="text"
+            placeholder="Nhập tài khoản hoặc email"
+            [(ngModel)]="email"
+            name="email"
+            required
+            autocomplete="username"
+          />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="label" for="login-pw">Mật khẩu</label>
+        <div class="field">
+          <svg class="field__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input
+            id="login-pw"
+            class="field__inp field__inp--pr"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Nhập mật khẩu"
+            [(ngModel)]="password"
+            name="password"
+            required
+            autocomplete="current-password"
+          />
+          <button type="button" class="field__eye"
+            (click)="showPassword = !showPassword"
+            [title]="showPassword ? 'Ẩn' : 'Hiện'">
+            <svg *ngIf="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg *ngIf="showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="row-between">
+        <label class="check-label">
+          <input type="checkbox" class="check-native" [(ngModel)]="showPassword" name="showPassword" />
+        </label>
+        <a href="#" class="forgot" (click)="$event.preventDefault(); forgotPopup = true">
+          Quên mật khẩu?
+        </a>
+      </div>
+
+      <button type="submit" class="btn btn--rose">
+        <span>Đăng Nhập</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+
+      <div class="or-row">
+        <span class="or-line"></span>
+        <span class="or-text">hoặc</span>
+        <span class="or-line"></span>
+      </div>
+
+      <button type="button" class="btn btn--ms" (click)="onMicrosoftLogin()">
+        <svg width="18" height="18" viewBox="0 0 21 21">
+          <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+          <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+          <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+          <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+        </svg>
+        Tiếp tục với Microsoft
+      </button>
+
+      <p class="switch-hint">
+        Chưa có tài khoản?
+        <a class="switch-link" (click)="isLogin = false">Đăng ký ngay</a>
+      </p>
+
+    </form>
+
+    <form *ngIf="!isLogin" (ngSubmit)="onRegister()" class="form" autocomplete="off">
+
+      <!-- Tiêu đề -->
+      <div class="form-title">
+        <h2 class="form-heading">Tạo tài khoản mới ✨</h2>
+      </div>
+
+      <div class="field-group">
+        <label class="label">Họ và tên</label>
+        <div class="field">
+          <svg class="field__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input class="field__inp" type="text" placeholder="Nguyễn Văn A"
+            [(ngModel)]="registerFullName" name="registerFullName" required />
+           
+        </div>
+          <span *ngIf="registerFullNameError" class="error-message">{{ registerFullNameError }}</span>
+      </div>
+
+      <div class="field-group">
+        <label class="label">Email / Tài khoản</label>
+        <div class="field">
+          <svg class="field__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input class="field__inp" type="text" placeholder="email@example.com"
+            [(ngModel)]="registerEmail" name="registerEmail" required />
+        </div>
+          <span *ngIf="registerEmailError" class="error-message">{{ registerEmailError }}</span>
+      </div>
+
+      <div class="field-group">
+        <label class="label">Mật khẩu</label>
+        <div class="field">
+          <svg class="field__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input class="field__inp" type="password" placeholder="Tối thiểu 8 ký tự"
+            [(ngModel)]="registerPassword" name="registerPassword" required />
+        </div>
+          <span *ngIf="registerPasswordError" class="error-message">{{ registerPasswordError }}</span>
+      </div>
+
+      <div class="field-group">
+        <label class="label">Số điện thoại </label>
+        <div class="field">
+          <svg class="field__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.16 6.16l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          <input class="field__inp" type="text" placeholder="0912 345 678"
+            [(ngModel)]="registerPhone" name="registerPhone" />
+        </div>
+        <span *ngIf="registerPhoneError" class="error-message">{{ registerPhoneError }}</span>
+      </div>
+
+      <button type="submit" class="btn btn--rose" style="margin-top:4px">
+        <span>Tạo Tài Khoản</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+      <p class="switch-hint">
+        Đã có tài khoản?
+        <a class="switch-link" (click)="isLogin = true">Đăng nhập</a>
+      </p>
+
+    </form>
+
+    <p class="footer-note">© 2026 Mobile Store Management</p>
+  </div>
+  <div class="forgot-overlay" [class.show]="forgotPopup" (click)="forgotPopup = false">
+    <div class="forgot-box" (click)="$event.stopPropagation()">
+      <div class="forgot-icon">🔑</div>
+      <div class="forgot-title">Quên mật khẩu?</div>
+      <div class="forgot-sub">
+        Vui lòng liên hệ số điện thoại để được hỗ trợ đặt lại mật khẩu
+      </div>
+      <a href="tel:0394140197" class="forgot-phone">📞 0394140197</a>
+      <button class="forgot-close" (click)="forgotPopup = false">Đóng</button>
+    </div>
+  </div>
+</div>
