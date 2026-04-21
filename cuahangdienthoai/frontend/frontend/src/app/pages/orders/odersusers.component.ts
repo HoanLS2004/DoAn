@@ -45,8 +45,8 @@ const STATUS_META: Record<string, { label: string; icon: string }> = {
   styleUrls: ['./odersusers.component.css'],
 })
 export class OrdersUsersComponent implements OnInit {
-  private readonly API = `${API_BASE_URL}/orders`;
-  private readonly PAYMENT_API = `${API_BASE_URL}/payments`;
+  private readonly API = `${API_BASE_URL}/api/orders`;
+  private readonly PAYMENT_API = `${API_BASE_URL}/api/payments`;
 
   orders:         Order[] = [];
   filteredOrders: Order[] = [];

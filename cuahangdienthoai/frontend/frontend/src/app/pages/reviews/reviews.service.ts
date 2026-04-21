@@ -18,7 +18,7 @@ export interface Review {
 })
 export class ReviewsService {
 
-  private api = `${API_BASE_URL}/reviews`;
+  private api = `${API_BASE_URL}/api/reviews`;
 
   constructor(private http: HttpClient) {}
 

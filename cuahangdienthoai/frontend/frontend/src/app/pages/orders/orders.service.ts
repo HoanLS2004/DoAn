@@ -5,7 +5,7 @@ import { Order } from './order.model';
 import { API_BASE_URL } from '../../config/api.config';
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private apiUrl = `${API_BASE_URL}/orders`; 
+  private apiUrl = `${API_BASE_URL}/api/orders`;
 
   constructor(private http: HttpClient) {}
 

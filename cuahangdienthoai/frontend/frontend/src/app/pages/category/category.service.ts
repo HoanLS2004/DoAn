@@ -13,7 +13,7 @@ export interface Category {
 })
 export class CategoryService {
 
-  api = `${API_BASE_URL}/categories`;
+  api = `${API_BASE_URL}/api/categories`;
 
   constructor(private http: HttpClient) {}
 

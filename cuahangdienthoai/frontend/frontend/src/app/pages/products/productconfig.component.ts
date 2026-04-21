@@ -48,7 +48,7 @@ const EMPTY_FORM = (): Config => ({
 })
 export class ProductConfigComponent implements OnInit {
 
-  private readonly API = `${API_BASE_URL}/ProductConfigurations`;
+  private readonly API = `${API_BASE_URL}/api/ProductConfigurations`;
 
   configs:         Config[] = [];
   filteredConfigs: Config[] = [];

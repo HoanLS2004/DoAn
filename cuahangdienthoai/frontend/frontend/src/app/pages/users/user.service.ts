@@ -17,7 +17,7 @@ interface UserApiResponse {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = `${API_BASE_URL}/users`;
+  private apiUrl = `${API_BASE_URL}/api/users`;
 
   constructor(private http: HttpClient) {}
 

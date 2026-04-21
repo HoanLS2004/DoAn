@@ -83,15 +83,14 @@ export class ProductDetailComponent implements OnInit {
   }
 
   loadProduct() {
-    this.http.get(`${API_BASE_URL}/products/${this.id}`)
+    this.http.get(`${API_BASE_URL}/api/products/${this.id}`)
       .subscribe(res => this.product = res);
   }
 
   loadImages() {
-    this.http.get<any[]>(`${API_BASE_URL}/ProductImages?productId=${this.id}`)
+    this.http.get<any[]>(`${API_BASE_URL}/api/ProductImages?productId=${this.id}`)
       .subscribe(res => this.images = res);
   }
-
   addToCart() {
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const index = cart.findIndex((x: any) => x.productID === this.product.productID);

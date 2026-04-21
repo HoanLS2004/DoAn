@@ -6,9 +6,9 @@ import { Category } from '../category/category.service';
 import { API_BASE_URL } from '../../config/api.config';
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private apiUrl = `${API_BASE_URL}/products`;
-  private brandUrl = `${API_BASE_URL}/brands`;
-  private categoryUrl = `${API_BASE_URL}/category`;
+  private apiUrl = `${API_BASE_URL}/api/products`;
+  private brandUrl = `${API_BASE_URL}/api/brands`;
+  private categoryUrl = `${API_BASE_URL}/api/categories`;
 
 
   constructor(private http: HttpClient) {}
