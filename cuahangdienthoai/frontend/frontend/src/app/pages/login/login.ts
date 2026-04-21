@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
+import { API_BASE_URL } from '../../config/api.config';
 export type ToastType = 'success' | 'error' | 'info';
 
 export interface Toast {
@@ -156,7 +156,7 @@ export class LoginComponent implements AfterViewInit {
     }
 
     this.http
-      .post<{ token: string; role: string }>('http://localhost:5201/api/auth/login', {
+      .post<{ token: string; role: string }>(`${API_BASE_URL}/api/auth/login`, {
         email: this.email,
         password: this.password,
       })

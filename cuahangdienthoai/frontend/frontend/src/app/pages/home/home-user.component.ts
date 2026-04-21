@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
 import { ProductService } from '../products/products.service';
 import { ChatbotComponent } from '../chatbot/chatbot.component';
-
+import { API_BASE_URL } from '../../config/api.config';
 interface PriceRange { label: string; min: number; max: number; }
 
 @Component({
@@ -57,7 +57,7 @@ export class HomeUserComponent implements OnInit {
   reviewCountMap: Map<number, number> = new Map();
   ramRomMap: Map<number, string> = new Map();
 
-  private readonly API = 'http://localhost:5201';
+  private readonly API = `${API_BASE_URL}/api`;
 
   constructor(
     private http:           HttpClient,

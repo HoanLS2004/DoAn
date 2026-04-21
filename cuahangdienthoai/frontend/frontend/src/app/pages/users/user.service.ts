@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from './user.model';
 import { UserCreateDTO } from './user.model'; 
-
+import { API_BASE_URL } from '../../config/api.config';
 import { UserUpdateDTO } from './user.model'; 
 
 interface UserApiResponse {
@@ -17,7 +17,7 @@ interface UserApiResponse {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:5201/api/users';
+  private apiUrl = `${API_BASE_URL}/api/users`;
 
   constructor(private http: HttpClient) {}
 
@@ -40,6 +40,6 @@ export class UserService {
 }
 
   deleteUser(id: number) {
-    return this.http.delete(`http://localhost:5201/api/users/${id}`);
+     return this.http.delete(`${API_BASE_URL}/api/users/${id}`);
   }
 }

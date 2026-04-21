@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ChangeDetectorRef } from '@angular/core';
+import { API_BASE_URL } from '../../config/api.config';
 @Component({
   selector: 'app-chatbot',
   standalone: true,
@@ -40,7 +41,7 @@ export class ChatbotComponent {
     this.typing   = true;
     this.scroll();
 
-    this.http.post<{ reply: string }>('http://localhost:5201/api/chat', { message: text })
+    this.http.post<{ reply: string }>(`${API_BASE_URL}/api/chat`, { message: text })
       .subscribe({
         next: res => {
           this.typing   = false;

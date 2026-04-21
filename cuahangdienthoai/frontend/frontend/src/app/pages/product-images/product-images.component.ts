@@ -5,7 +5,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
-
+import { API_BASE_URL } from '../../config/api.config';
 interface Toast {
   show: boolean;
   message: string;
@@ -64,7 +64,7 @@ export class ProductImagesComponent {
   }
   // ─────────────────────────────────────────────────────────
 
-  private readonly API = 'http://localhost:5201';
+  private readonly API = `${API_BASE_URL}/api/productimages`;
 
   constructor(
     private fb: FormBuilder,

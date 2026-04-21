@@ -8,7 +8,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { OrderService } from '../orders/orders.service';
 import { AuthService } from '../../guards/auth.service';
 import { filter } from 'rxjs/operators';
-
+import { API_BASE_URL } from '../../config/api.config';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -66,7 +66,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserInfo();
 
-    this.http.get<any[]>('http://localhost:5201/api/HomeBanner/banners').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/HomeBanner/banners`).subscribe({
       next: data => { this.banners = data.map(b => ({ ...b, LinkUrl: b.LinkUrl || '/' })); },
       error: err  => console.error('Failed to load banners', err),
     });

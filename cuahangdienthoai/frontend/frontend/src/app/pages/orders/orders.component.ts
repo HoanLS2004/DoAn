@@ -9,7 +9,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { OrderService } from './orders.service';
 import { Order } from './order.model';
 import { ProductService } from '../products/products.service';
-
+import { API_BASE_URL } from '../../config/api.config';
 interface NewOrderDetail { productID: number | null; quantity: number; unitPrice: number; }
 interface Toast          { show: boolean; message: string; type: 'success' | 'error'; }
 interface EditInfoForm {

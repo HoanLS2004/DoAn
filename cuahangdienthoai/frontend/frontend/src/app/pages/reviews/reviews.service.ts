@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
+import { API_BASE_URL } from '../../config/api.config';
 export interface Review {
   reviewID: number;
   productID: number;
@@ -18,7 +18,7 @@ export interface Review {
 })
 export class ReviewsService {
 
-  private api = "http://localhost:5201/api/reviews";
+  private api = `${API_BASE_URL}/api/reviews`;
 
   constructor(private http: HttpClient) {}
 

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
+import { API_BASE_URL } from '../../config/api.config';
 
 interface Toast { show: boolean; message: string; type: 'success' | 'error' | 'info'; }
 
@@ -45,7 +46,7 @@ export class CheckoutComponent implements OnInit {
 
   toast: Toast = { show: false, message: '', type: 'success' };
 
-  private readonly API = 'http://localhost:5201';
+  private readonly API = `${API_BASE_URL}/api`;
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 

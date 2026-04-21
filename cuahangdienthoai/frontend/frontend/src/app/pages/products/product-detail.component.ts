@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-
+import { API_BASE_URL } from '../../config/api.config';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
@@ -11,11 +11,11 @@ import { HttpClient } from '@angular/common/http';
   <div class="container" *ngIf="product">
 
     <div class="left">
-      <img [src]="'http://localhost:5201' + product.imageUrl" class="main-img"/>
+      <img [src]="${API_BASE_URL}" + product.imageUrl" class="main-img"/>
 
       <div class="thumbs">
         <img *ngFor="let img of images"
-             [src]="'http://localhost:5201' + img.imageUrl"
+             [src]="${API_BASE_URL}" + img.imageUrl"
              (click)="product.imageUrl = img.imageUrl">
       </div>
     </div>

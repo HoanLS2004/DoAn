@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { API_BASE_URL } from '../../config/api.config';
 export interface RevenueDto {
   period: string;        // ISO date
   totalRevenue: number;
@@ -10,7 +10,7 @@ export interface RevenueDto {
 
 @Injectable({ providedIn: 'root' })
 export class RevenueService {
-  private apiUrl = 'https://localhost:7152/api/revenue';
+  private apiUrl = `${API_BASE_URL}/api/revenue`;
 
   constructor(private http: HttpClient) {}
 

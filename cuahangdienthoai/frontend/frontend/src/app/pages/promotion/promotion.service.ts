@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { API_BASE_URL } from '../../config/api.config';
 export interface Promotion {
   promotionID?: number;
   code: string;
@@ -18,7 +18,7 @@ export interface Promotion {
 
 @Injectable({ providedIn: 'root' })
 export class PromotionService {
-  private apiUrl = 'http://localhost:5201/api/Promotions';
+  private apiUrl = `${API_BASE_URL}/api/Promotions`;
 
   constructor(private http: HttpClient) {}
 

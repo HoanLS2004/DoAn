@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
-
+import { API_BASE_URL } from '../../config/api.config';
 interface Toast { show: boolean; message: string; type: 'success' | 'error'; }
 
 @Component({
@@ -45,7 +45,7 @@ export class ProductDetailuserComponent implements OnInit {
   productConfig: any = null;
   configPopup    = false;
 
-  private readonly API = 'http://localhost:5201';
+  private readonly API = `${API_BASE_URL}`;
   private readonly THUMB_VISIBLE = 6; 
 
   constructor(

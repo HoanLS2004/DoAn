@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { API_BASE_URL } from '../../config/api.config';
 export interface ShoppingCart {
   productID: number;
   productName: string;
@@ -18,7 +18,7 @@ export interface ShoppingCart {
 })
 export class ShoppingCartService {
 
-  private apiUrl = 'http://localhost:5201/api/cart';
+  private apiUrl = `${API_BASE_URL}/api/cart`;
 
   constructor(private http: HttpClient) {}
 

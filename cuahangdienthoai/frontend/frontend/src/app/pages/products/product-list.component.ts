@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-
+import { API_BASE_URL } from '../../config/api.config';
 @Component({
   selector: 'app-product-list',
   standalone: true,
@@ -13,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
 
     <div class="grid">
       <div class="card" *ngFor="let p of products">
-        <img [src]="'http://localhost:5201' + (p.thumbnailUrl || '/uploads/default.png')" />
+        <img [src]="${API_BASE_URL}" + (p.thumbnailUrl || '/uploads/default.png')" />
 
         <h3>{{ p.name }}</h3>
 
@@ -63,7 +63,7 @@ export class ProductListComponent implements OnInit {
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.http.get<any>('http://localhost:5201/api/products')
+    this.http.get<any>(`${API_BASE_URL}/api/products`)
       .subscribe(res => {
         this.products = res.items;
       });

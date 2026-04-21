@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminOnlyDirective } from '../../guards/adminonly.directive';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
-
+import { API_BASE_URL } from '../../config/api.config';
 interface Toast { show: boolean; message: string; type: 'success' | 'error'; }
 interface Config {
   configurationID?: number;
@@ -48,7 +48,7 @@ const EMPTY_FORM = (): Config => ({
 })
 export class ProductConfigComponent implements OnInit {
 
-  private readonly API = 'http://localhost:5201';
+  private readonly API = `${API_BASE_URL}/api/ProductConfigurations`;
 
   configs:         Config[] = [];
   filteredConfigs: Config[] = [];
