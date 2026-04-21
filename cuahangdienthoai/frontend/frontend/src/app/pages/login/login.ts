@@ -223,7 +223,7 @@ export class LoginComponent implements AfterViewInit {
   if (hasError) return;
 
   this.http
-    .post('http://localhost:5201/api/auth/register', {
+    .post('https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/auth/register', {
       fullName: this.registerFullName,
       email: this.registerEmail,
       password: this.registerPassword,

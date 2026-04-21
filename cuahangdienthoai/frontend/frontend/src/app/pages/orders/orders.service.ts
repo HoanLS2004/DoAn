@@ -5,7 +5,7 @@ import { Order } from './order.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private apiUrl = 'http://localhost:5201/api/orders'; // 🔥 thống nhất
+  private apiUrl = 'https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/orders'; // 🔥 thống nhất
 
   constructor(private http: HttpClient) {}
 

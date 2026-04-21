@@ -6,9 +6,9 @@ import { Category } from '../category/category.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private apiUrl = 'https://localhost:7152/api/products';
-  private brandUrl = 'https://localhost:7152/api/brands';
-  private categoryUrl = 'https://localhost:7152/api/category';
+  private apiUrl = 'https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/products';
+  private brandUrl = 'https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/brands';
+  private categoryUrl = 'https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/category';
 
 
   constructor(private http: HttpClient) {}
@@ -46,7 +46,7 @@ export class ProductService {
     return this.http.get<Category[]>(this.categoryUrl);
   }
   getTotalActiveProducts() {
-    return this.http.get<any>('http://localhost:5201/api/products/total-active');
+    return this.http.get<any>('https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/products/total-active');
   }
   getProducts(params?: any): Observable<{ items: ProductDto[], totalItems: number }> {
   const defaultParams = { pageSize: 999, page: 1, ...(params || {}) };

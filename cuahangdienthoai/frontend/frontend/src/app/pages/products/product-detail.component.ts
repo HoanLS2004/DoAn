@@ -82,12 +82,12 @@ export class ProductDetailComponent implements OnInit {
   }
 
   loadProduct() {
-    this.http.get(`http://localhost:5201/api/products/${this.id}`)
+    this.http.get(`https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/products/${this.id}`)
       .subscribe(res => this.product = res);
   }
 
   loadImages() {
-    this.http.get<any[]>(`http://localhost:5201/api/ProductImages?productId=${this.id}`)
+    this.http.get<any[]>(`https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/ProductImages?productId=${this.id}`)
       .subscribe(res => this.images = res);
   }
 

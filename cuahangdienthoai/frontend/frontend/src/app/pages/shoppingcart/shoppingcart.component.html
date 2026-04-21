@@ -60,7 +60,7 @@
     <div class="pop-body" *ngIf="delPopup.item">
       <div class="pop-product">
         <img class="pop-product-img"
-          [src]="'http://localhost:5201' + delPopup.item.thumbnail"
+          [src]="'https://inconceivable-matrilineal-gaylene.ngrok-free.dev' + delPopup.item.thumbnail"
           [alt]="delPopup.item.productName"
           (error)="onImgErr($event)"/>
         <div>
@@ -104,7 +104,7 @@
       <div class="pop-order-list">
         <div class="pop-order-item" *ngFor="let item of selectedItems()">
           <img class="pop-order-img"
-            [src]="'http://localhost:5201' + item.thumbnail"
+            [src]="'https://inconceivable-matrilineal-gaylene.ngrok-free.dev' + item.thumbnail"
             [alt]="item.productName"
             (error)="onImgErr($event)"/>
           <span class="pop-order-name">{{ item.productName }}</span>
@@ -181,7 +181,7 @@
           <!-- image -->
           <div class="card-img-wrap">
             <img class="card-img"
-              [src]="'http://localhost:5201' + item.thumbnail"
+              [src]="'https://inconceivable-matrilineal-gaylene.ngrok-free.dev' + item.thumbnail"
               [alt]="item.productName"
               (error)="onImgErr($event)"/>
             <div class="card-disc" *ngIf="item.discount > 0">-{{ item.discount }}%</div>

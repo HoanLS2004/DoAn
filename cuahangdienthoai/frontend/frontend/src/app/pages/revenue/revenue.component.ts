@@ -38,7 +38,7 @@ export class RevenueComponent implements OnInit, OnDestroy {
   toastType: 'success' | 'error' = 'success';
   private toastTimer?: any;
 
-  private apiBase = 'https://localhost:7152/api/revenue';
+  private apiBase = 'https://inconceivable-matrilineal-gaylene.ngrok-free.dev/api/revenue';
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
