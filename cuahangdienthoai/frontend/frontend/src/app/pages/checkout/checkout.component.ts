@@ -197,4 +197,9 @@ export class CheckoutComponent implements OnInit {
     this.toast = { show: true, message, type };
     setTimeout(() => (this.toast.show = false), 2800);
   }
+  getThumbUrl(thumbnail: string): string {
+    if (!thumbnail) return 'assets/no-image.png';
+    if (thumbnail.startsWith('http')) return thumbnail;
+    return `${this.API}${thumbnail}`;
+  }
 }

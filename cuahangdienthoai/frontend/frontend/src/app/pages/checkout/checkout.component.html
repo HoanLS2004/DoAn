@@ -1,5 +1,3 @@
-<!-- checkout.component.html -->
-
 <!-- ── TOPBAR ── -->
 <div class="topbar">
   <a class="tb-logo" routerLink="/">
@@ -20,12 +18,9 @@
   {{ toast.message }}
 </div>
 
-<!-- ════════════════════════════════════════════════
-     POPUP 1 — XÁC NHẬN ĐẶT HÀNG
-════════════════════════════════════════════════ -->
+<!-- POPUP 1 — XÁC NHẬN ĐẶT HÀNG -->
 <div class="popup-overlay" [class.show]="confirmPopup" (click)="confirmPopup = false">
   <div class="popup-box" (click)="$event.stopPropagation()">
-
     <div class="pop-head confirm">
       <div class="pop-head-ico">📋</div>
       <div>
@@ -33,14 +28,11 @@
         <div class="pop-head-sub">Kiểm tra lại thông tin trước khi đặt</div>
       </div>
     </div>
-
     <div class="pop-body">
-
-      <!-- Danh sách sản phẩm -->
       <div class="pop-order-list">
         <div class="pop-order-item" *ngFor="let item of cartItems">
           <img class="pop-order-img"
-            [src]="'https://inconceivable-matrilineal-gaylene.ngrok-free.dev' + item.thumbnail"
+            [src]="getThumbUrl(item.thumbnail)"
             [alt]="item.productName"
             (error)="onImgErr($event)"/>
           <span class="pop-order-name">{{ item.productName }}</span>
@@ -50,8 +42,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Địa chỉ -->
       <div class="pop-addr-block">
         <div class="pop-addr-row">
           <span class="pop-addr-lbl">👤 Người nhận</span>
@@ -66,21 +56,15 @@
           <span class="pop-addr-val">{{ order.shippingAddress }}</span>
         </div>
       </div>
-
-      <!-- Total -->
       <div class="pop-total-row">
         <span class="pop-total-lbl">Tổng thanh toán</span>
         <span class="pop-total-val">{{ finalAmount | number:'1.0-0' }}₫</span>
       </div>
-
-      <!-- Phương thức -->
       <div class="pop-pay-method">
         <span>{{ order.paymentMethod === 'COD' ? '💵' : '💜' }}</span>
         {{ order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng (COD)' : 'Ví MoMo' }}
       </div>
-
     </div>
-
     <div class="pop-footer">
       <button class="pbtn pbtn-ghost" (click)="confirmPopup = false">← Sửa lại</button>
       <button class="pbtn pbtn-green" (click)="doCheckout()" [disabled]="isLoading">
@@ -88,16 +72,12 @@
         {{ isLoading ? 'Đang xử lý...' : '⚡ Đặt hàng ngay' }}
       </button>
     </div>
-
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════
-     POPUP 2 — ĐẶT HÀNG THÀNH CÔNG
-════════════════════════════════════════════════ -->
+<!-- POPUP 2 — ĐẶT HÀNG THÀNH CÔNG -->
 <div class="popup-overlay" [class.show]="successPopup">
   <div class="popup-box">
-
     <div class="pop-success-body">
       <div class="pop-success-ani">🎉</div>
       <div class="pop-success-ttl">Đặt hàng thành công!</div>
@@ -105,20 +85,15 @@
       <div class="pop-success-order" *ngIf="orderId">Mã đơn hàng: #{{ orderId }}</div>
       <div class="pop-success-sub" style="margin-top:8px">Chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất</div>
     </div>
-
     <div class="pop-footer">
       <button class="pbtn pbtn-blue pbtn-full" (click)="goHome()">🏠 Về trang chủ</button>
     </div>
-
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════
-     POPUP 3 — VOUCHER ÁP DỤNG THÀNH CÔNG
-════════════════════════════════════════════════ -->
+<!-- POPUP 3 — VOUCHER -->
 <div class="popup-overlay" [class.show]="voucherPopup" (click)="voucherPopup = false">
   <div class="popup-box" (click)="$event.stopPropagation()">
-
     <div class="pop-head voucher">
       <div class="pop-head-ico">🎫</div>
       <div>
@@ -126,7 +101,6 @@
         <div class="pop-head-sub">Voucher đã được áp dụng thành công</div>
       </div>
     </div>
-
     <div class="pop-body">
       <div class="pop-voucher-result">
         <div class="pop-voucher-ico">🎉</div>
@@ -135,45 +109,30 @@
         <div class="pop-voucher-sub">Mã: {{ order.voucherCode }} · Tổng sau giảm: {{ finalAmount | number:'1.0-0' }}₫</div>
       </div>
     </div>
-
     <div class="pop-footer">
       <button class="pbtn pbtn-red pbtn-full" (click)="voucherPopup = false">Tuyệt vời! 👍</button>
     </div>
-
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════
-     PAGE
-════════════════════════════════════════════════ -->
+<!-- PAGE -->
 <div class="page">
 
-  <!-- Breadcrumb -->
   <div class="breadcrumb">
     <a routerLink="/">🏠 Trang chủ</a> ›
     <a routerLink="/cart">Giỏ hàng</a> ›
     <span class="bc-active">Thanh toán</span>
   </div>
 
-  <!-- Steps -->
   <div class="steps">
-    <div class="step done">
-      <div class="step-dot">✓</div>
-      Giỏ hàng
-    </div>
+    <div class="step done"><div class="step-dot">✓</div>Giỏ hàng</div>
     <div class="step-line done"></div>
-    <div class="step active">
-      <div class="step-dot">2</div>
-      Đặt hàng
-    </div>
+    <div class="step active"><div class="step-dot">2</div>Đặt hàng</div>
     <div class="step-line"></div>
-    <div class="step">
-      <div class="step-dot">3</div>
-      Hoàn thành
-    </div>
+    <div class="step"><div class="step-dot">3</div>Hoàn thành</div>
   </div>
 
-  <!-- ĐỊA CHỈ NHẬN HÀNG -->
+  <!-- ĐỊA CHỈ -->
   <div class="card">
     <div class="card-hdr">
       <div class="card-hdr-ico ico-red">📍</div>
@@ -203,7 +162,6 @@
       <div class="card-hdr-ico ico-blue">🛍️</div>
       <span class="card-ttl">Sản Phẩm Đặt Hàng</span>
     </div>
-
     <ng-container *ngIf="cartItems.length > 0; else emptyCart">
       <div class="tbl-wrap">
         <table>
@@ -221,7 +179,7 @@
               <td>
                 <div class="prod-info">
                   <div class="prod-thumb">
-                    <img [src]="'https://inconceivable-matrilineal-gaylene.ngrok-free.dev' + item.thumbnail"
+                    <img [src]="getThumbUrl(item.thumbnail)"
                       [alt]="item.productName" (error)="onImgErr($event)"/>
                   </div>
                   <div>
@@ -235,7 +193,7 @@
               </td>
               <td>
                 <span class="disc-badge" *ngIf="item.discount > 0">-{{ item.discount }}%</span>
-                <span class="no-disc"    *ngIf="!item.discount || item.discount === 0">—</span>
+                <span class="no-disc" *ngIf="!item.discount || item.discount === 0">—</span>
               </td>
               <td><span class="qty-badge">×{{ item.quantity }}</span></td>
               <td>
@@ -248,7 +206,6 @@
         </table>
       </div>
     </ng-container>
-
     <ng-template #emptyCart>
       <div style="text-align:center;padding:40px;color:var(--muted)">
         <div style="font-size:40px;margin-bottom:10px">🛒</div>
@@ -311,7 +268,7 @@
     </div>
   </div>
 
-  <!-- TỔNG ĐƠN HÀNG -->
+  <!-- TỔNG -->
   <div class="card">
     <div class="card-hdr">
       <div class="card-hdr-ico ico-green">🧾</div>
@@ -331,35 +288,27 @@
           <span class="sum-lbl">Giảm voucher</span>
           <span class="sum-val green">-{{ discountAmount | number:'1.0-0' }}₫</span>
         </div>
-
         <hr class="sum-divider"/>
-
         <div class="sum-row">
           <span class="sum-total-lbl">Tổng thanh toán</span>
           <span class="sum-total-val">{{ finalAmount | number:'1.0-0' }}₫</span>
         </div>
       </div>
-
       <div class="sum-save-note" *ngIf="discountAmount > 0">
         🎉 Bạn tiết kiệm được {{ discountAmount | number:'1.0-0' }}₫ cho đơn hàng này!
       </div>
     </div>
-
-    <!-- CHECKOUT BAR -->
     <div class="checkout-bar">
       <div>
         <div class="checkout-total-lbl">Tổng cộng ({{ cartItems.length }} sản phẩm):</div>
         <div class="checkout-total-val">{{ finalAmount | number:'1.0-0' }}₫</div>
       </div>
-      <button class="btn-checkout-main"
-        type="button"
+      <button class="btn-checkout-main" type="button"
         [disabled]="isLoading || cartItems.length === 0"
         (click)="openConfirmPopup()">
         ⚡ Đặt Hàng
       </button>
     </div>
-
-    <!-- POLICY BAR -->
     <div class="policy-bar">
       <div class="policy-item">🔒 Bảo mật thanh toán</div>
       <div class="policy-item">🔄 Đổi trả 15 ngày</div>
@@ -367,5 +316,4 @@
       <div class="policy-item">✅ Hàng chính hãng</div>
     </div>
   </div>
-
-</div><!-- /page -->
+</div>
