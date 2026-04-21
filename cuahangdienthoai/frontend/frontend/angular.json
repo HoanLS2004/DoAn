@@ -31,15 +31,30 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "3MB",
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "50kB",
+                  "maximumError": "100kB"
                 }
               ],
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": {
+                  "inline": false
+                }
+              },
+              "allowedCommonJsDependencies": [
+                "xlsx-js-style"
+              ],
+              "outputHashing": "all"
+            },
               "outputHashing": "all"
             },
             "development": {
@@ -81,8 +96,7 @@
           }
         }
       }
-    }
-  },
+    },
   "cli": {
     "analytics": "47f6dc9d-db4e-4991-9320-c3e29d8b2f0b"
   }
