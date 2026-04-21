@@ -100,7 +100,7 @@ export class ProductConfigComponent implements OnInit {
 
   // ── LOAD ─────────────────────────────────────────────
   load(): void {
-    this.http.get<Config[]>(`${this.API}/api/ProductConfigurations`).subscribe({
+    this.http.get<Config[]>(this.API).subscribe({
       next: res => {
         this.configs         = res ?? [];
         this.filteredConfigs = [...this.configs];
@@ -170,7 +170,7 @@ export class ProductConfigComponent implements OnInit {
       this.showToast('Vui lòng nhập mã cấu hình và Product ID', 'error'); return;
     }
     this.formPopup.loading = true;
-    this.http.post<Config>(`${this.API}/api/ProductConfigurations`, this.buildDto()).subscribe({
+    this.http.post<Config>(this.API, this.buildDto()).subscribe({
       next: () => {
         this.formPopup.loading = false;   // reset trước
         this.showToast('✅ Thêm cấu hình thành công!', 'success');
@@ -199,7 +199,7 @@ export class ProductConfigComponent implements OnInit {
     }
 
     this.formPopup.loading = true;
-    this.http.put(`${this.API}/api/ProductConfigurations/${id}`, this.buildDto()).subscribe({
+    this.http.put(`${this.API}/${id}`, this.buildDto()).subscribe({
       next: () => {
         this.formPopup.loading = false;   // reset trước
         this.showToast('💾 Cập nhật thành công!', 'success');
@@ -215,7 +215,7 @@ export class ProductConfigComponent implements OnInit {
 
   confirmDelete(): void {
     this.delPopup.loading = true;
-    this.http.delete(`${this.API}/api/ProductConfigurations/${this.delPopup.id}`).subscribe({
+    this.http.delete(`${this.API}/${this.delPopup.id}`).subscribe({
       next: () => {
         this.showToast(`🗑️ Đã xóa cấu hình ${this.delPopup.configCode}`, 'success');
         this.closeDelPopup();

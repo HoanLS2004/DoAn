@@ -195,19 +195,32 @@ export class ProductImagesComponent {
     });
   }
 
-  editImage(img: any): void {
-    this.isEditing   = true;
-    this.editImageId = img.imageID;
-    this.selectedFile = null;
-    this.previews    = [`${API_BASE_URL}${img.imageUrl}`];
+      private _resolveImageUrl(imageUrl: string): string {
+      if (!imageUrl) return '';
+      // Nếu đã là URL đầy đủ (http/https) thì dùng luôn
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl;
+      }
+      // Tránh double slash
+      const base = this.baseUrl.replace(/\/$/, '');
+      const path = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+      return `${base}${path}`;
+    }
 
-    this.uploadForm.patchValue({
-      productId:   img.productID,
-      isThumbnail: img.isThumbnail,
-    });
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+      editImage(img: any): void {
+        this.isEditing    = true;
+        this.editImageId  = img.imageID;
+        this.selectedFile = null;
+        this.previews     = [this._resolveImageUrl(img.imageUrl)]; // ← đổi dòng này
+
+        this.uploadForm.patchValue({
+          productId:   img.productID,
+          isThumbnail: img.isThumbnail,
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
   resetForm(): void {
     this.isEditing     = false;
