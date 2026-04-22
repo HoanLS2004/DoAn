@@ -109,7 +109,7 @@
 
 /* discount ribbon — top left, overlapping image */
 .card-disc {
-  position: absolute; top: 0; left: 0;
+  position: absolute; top: 0; right: 0;
   background: linear-gradient(135deg, var(--red), #ff2d4a);
   color: #fff; font-size: 11px; font-weight: 900;
   padding: 4px 10px; border-bottom-right-radius: 9px;
